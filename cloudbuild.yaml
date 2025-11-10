@@ -8,12 +8,13 @@ steps:
         docker build \
           --build-arg VITE_SUPABASE_URL="$$SUPABASE_URL" \
           --build-arg VITE_SUPABASE_ANON_KEY="$$SUPABASE_ANON_KEY" \
-          -t gcr.io/$PROJECT_ID/finanzaapp:$BUILD_ID .
+          -t gcr.io/$PROJECT_ID/finanzaapp:$BUILD_ID \
+          -t gcr.io/$PROJECT_ID/finanzaapp:latest .
     secretEnv: ['SUPABASE_URL', 'SUPABASE_ANON_KEY']
 
   # Push the image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/finanzaapp:$BUILD_ID']
+    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/finanzaapp']
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -21,11 +22,11 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'finanzaapp'
+      - 'finanzasapp'
       - '--image'
       - 'gcr.io/$PROJECT_ID/finanzaapp:$BUILD_ID'
       - '--region'
-      - 'us-central1'
+      - 'us-west2'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'

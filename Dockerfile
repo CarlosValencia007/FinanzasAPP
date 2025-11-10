@@ -24,6 +24,9 @@ RUN npm ci
 # Copia el código fuente
 COPY . .
 
+# Debug: Verificar que las variables están disponibles (no muestra el valor completo por seguridad)
+RUN echo "Building with Supabase URL: ${VITE_SUPABASE_URL:0:30}..."
+
 # Construye la aplicación para producción
 RUN npm run build
 
