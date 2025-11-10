@@ -7,14 +7,23 @@ FROM node:20-alpine AS builder
 # Establece el directorio de trabajo
 WORKDIR /app
 
+# Declara argumentos de build para las variables de entorno
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+
+# Convierte los argumentos en variables de entorno para el build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 # Copia archivos de dependencias
 COPY package*.json ./
 
 # Instala todas las dependencias (incluyendo devDependencies para el build)
 RUN npm ci
 
-# Copia el código fuente
+# Copia el código fuente y archivo de entorno
 COPY . .
+COPY .env .env
 
 # Construye la aplicación para producción
 RUN npm run build
