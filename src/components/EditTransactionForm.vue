@@ -1,21 +1,15 @@
 <template>
   <form @submit.prevent="handleSubmit" class="transaction-form">
-    <div class="form-header">
-      <h2 class="form-title">Nueva Transacción</h2>
-      <p class="form-subtitle">Registra tus ingresos y gastos</p>
-    </div>
-
     <div class="form-grid">
       <div class="form-group">
-        <label for="type" class="form-label">
+        <label for="edit-type" class="form-label">
           <Icon icon="material-symbols:category" width="20" height="20" class="label-icon" />
           Tipo
         </label>
         <select 
-          id="type"
+          id="edit-type"
           name="type" 
           v-model="formData.type" 
-          @change="onTypeChange"
           class="form-select"
           required
         >
@@ -26,12 +20,12 @@
       </div>
 
       <div class="form-group">
-        <label for="amount" class="form-label">
+        <label for="edit-amount" class="form-label">
           <Icon icon="material-symbols:attach-money" width="20" height="20" class="label-icon" />
           Monto
         </label>
         <input 
-          id="amount"
+          id="edit-amount"
           name="amount"
           type="number" 
           v-model.number="formData.amount" 
@@ -44,21 +38,21 @@
       </div>
 
       <div class="form-group">
-        <label for="category" class="form-label">
+        <label for="edit-category" class="form-label">
           <Icon icon="material-symbols:label" width="20" height="20" class="label-icon" />
           Categoría
         </label>
         <input 
-          id="category"
+          id="edit-category"
           name="category"
           type="text" 
           v-model="formData.category" 
           class="form-input"
           placeholder="Ej: Salario, Comida, Transporte"
-          list="category-suggestions"
+          list="edit-category-suggestions"
           required
         />
-        <datalist id="category-suggestions">
+        <datalist id="edit-category-suggestions">
           <option value="Salario" />
           <option value="Freelance" />
           <option value="Beca" />
@@ -73,12 +67,12 @@
       </div>
 
       <div class="form-group full-width">
-        <label for="description" class="form-label">
+        <label for="edit-description" class="form-label">
           <Icon icon="material-symbols:description" width="20" height="20" class="label-icon" />
           Descripción (opcional)
         </label>
         <textarea
-          id="description"
+          id="edit-description"
           name="description"
           v-model="formData.description"
           class="form-textarea"
@@ -88,12 +82,12 @@
       </div>
 
       <div class="form-group">
-        <label for="date" class="form-label">
+        <label for="edit-date" class="form-label">
           <Icon icon="material-symbols:calendar-today" width="20" height="20" class="label-icon" />
           Fecha
         </label>
         <input 
-          id="date"
+          id="edit-date"
           name="date"
           type="date" 
           v-model="formData.date" 
@@ -118,9 +112,9 @@
         class="btn-primary"
         :disabled="loading || !isFormValid"
       >
-        <Icon v-if="!loading" icon="material-symbols:add" width="20" height="20" />
+        <Icon v-if="!loading" icon="material-symbols:save" width="20" height="20" />
         <Icon v-else icon="material-symbols:sync" width="20" height="20" class="spin-icon" />
-        {{ loading ? 'Guardando...' : 'Agregar Transacción' }}
+        {{ loading ? 'Guardando...' : 'Actualizar Transacción' }}
       </button>
     </div>
 
@@ -130,14 +124,19 @@
     </div>
     <div v-if="success" class="success-message">
       <Icon icon="material-symbols:check-circle" width="20" height="20" />
-      Transacción agregada exitosamente
+      Transacción actualizada exitosamente
     </div>
   </form>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import type { ITransaccionConCategoria } from '../interfaces'
+
+const props = defineProps<{
+  transaction: ITransaccionConCategoria
+}>()
 
 const emit = defineEmits<{
   submit: [data: { type: string; amount: number; category: string; description?: string; date: string }]
@@ -160,12 +159,26 @@ const success = ref(false)
 const today = new Date().toISOString().split('T')[0]
 
 const formData = reactive<TransactionData>({
-  type: '',
-  amount: null,
-  category: '',
-  description: '',
-  date: today
+  type: props.transaction.tipo === 'ingreso' ? 'ingreso' : 'egreso',
+  amount: props.transaction.monto,
+  category: props.transaction.categoria?.nombre || '',
+  description: props.transaction.descripcion || '',
+  date: props.transaction.fecha_transaccion
 })
+
+onMounted(() => {
+  console.log('EditTransactionForm montado con:', props.transaction)
+  console.log('FormData inicial:', formData)
+})
+
+// Vigilar cambios en la transacción para actualizar el formulario
+watch(() => props.transaction, (newTransaction) => {
+  formData.type = newTransaction.tipo === 'ingreso' ? 'ingreso' : 'egreso'
+  formData.amount = newTransaction.monto
+  formData.category = newTransaction.categoria?.nombre || ''
+  formData.description = newTransaction.descripcion || ''
+  formData.date = newTransaction.fecha_transaccion
+}, { deep: true })
 
 // Validar formulario
 const isFormValid = computed(() => {
@@ -177,12 +190,6 @@ const isFormValid = computed(() => {
     formData.date
   )
 })
-
-// Cambio de tipo
-const onTypeChange = () => {
-  // Limpiar categoría al cambiar tipo para sugerir categorías apropiadas
-  if (!formData.category) return
-}
 
 const handleSubmit = () => {
   if (!isFormValid.value) {
@@ -205,69 +212,42 @@ const handleSubmit = () => {
     success.value = true
     setTimeout(() => {
       success.value = false
-      resetForm()
+      loading.value = false
     }, 1500)
   } catch (err) {
-    error.value = 'Error al agregar la transacción'
+    error.value = 'Error al actualizar la transacción'
     loading.value = false
   }
 }
 
 const handleCancel = () => {
-  resetForm()
   emit('cancel')
-}
-
-const resetForm = () => {
-  formData.type = ''
-  formData.amount = null
-  formData.category = ''
-  formData.description = ''
-  formData.date = today
-  error.value = null
-  success.value = false
-  loading.value = false
 }
 </script>
 
 <style scoped>
 .transaction-form {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.form-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.form-title {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--color-texto-oscuro);
-  margin-bottom: 8px;
-}
-
-.form-subtitle {
-  color: #888;
-  font-size: 1rem;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+  display: block;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-group.full-width {
@@ -277,10 +257,10 @@ const resetForm = () => {
 .form-label {
   font-weight: 600;
   color: var(--color-texto-oscuro);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .label-icon {
@@ -290,10 +270,10 @@ const resetForm = () => {
 .form-input,
 .form-select,
 .form-textarea {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 2px solid var(--color-acento-suave);
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   background: white;
   font-family: inherit;
@@ -313,21 +293,21 @@ const resetForm = () => {
 
 .form-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 70px;
 }
 
 .form-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
 .btn-primary,
 .btn-secondary {
-  padding: 14px 28px;
-  border-radius: 12px;
+  padding: 12px 24px;
+  border-radius: 10px;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -368,28 +348,29 @@ const resetForm = () => {
 }
 
 .btn-secondary:hover {
-  background: #d0d0d0;
+  background: var(--color-acento-suave);
+  color: white;
 }
 
 .error-message {
-  margin-top: 16px;
-  padding: 12px 16px;
+  margin-top: 12px;
+  padding: 10px 14px;
   background: #ffe0e0;
   color: #c00;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .success-message {
-  margin-top: 16px;
-  padding: 12px 16px;
+  margin-top: 12px;
+  padding: 10px 14px;
   background: #d4edda;
   color: #155724;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -405,4 +386,3 @@ const resetForm = () => {
   }
 }
 </style>
-

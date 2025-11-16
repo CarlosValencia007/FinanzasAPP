@@ -6,11 +6,13 @@
     </div>
 
     <ul class="nav-links">
-      <router-link to="/">Inicio</router-link>
-      <router-link to="#acerca-de">Acerca de</router-link>
-      <router-link to="#servicios">Servicios</router-link>
-      <router-link to="#contacto">Contacto</router-link>
+      <router-link to="/" exact>Inicio</router-link>
       
+      <!-- Mostrar Dashboard y Transacciones solo si está autenticado -->
+      <template v-if="isAuthenticated">
+        <router-link to="/dashboard">Dashboard</router-link>
+        <router-link to="/transactions">Transacciones</router-link>
+      </template>
       <!-- Mostrar según estado de autenticación -->
       <template v-if="isAuthenticated">
         <span class="user-email">{{ userEmail }}</span>
@@ -64,6 +66,21 @@ const handleLogout = async () => {
   userEmail.value = '';
   router.push('/');
 };
+
+const scrollToSection = (event: Event) => {
+  // Si estamos en la homepage, hacer scroll suave
+  if (router.currentRoute.value.path === '/') {
+    event.preventDefault();
+    const target = (event.target as HTMLAnchorElement).getAttribute('href');
+    if (target) {
+      const element = document.querySelector(target.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
+  // Si no estamos en homepage, dejar que el link normal funcione
+};
 </script>
 
 <style scoped>
@@ -103,6 +120,22 @@ nav {
 }
 .nav-links a:hover {
   color: #A2D3C7;
+}
+.nav-links a.active-link,
+.nav-links a.router-link-active {
+  color: #A2D3C7;
+  position: relative;
+}
+.nav-links a.active-link::after,
+.nav-links a.router-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #A2D3C7;
+  border-radius: 2px;
 }
 .user-email {
   color: #A2D3C7;
