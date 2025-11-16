@@ -66,21 +66,6 @@ const handleLogout = async () => {
   userEmail.value = '';
   router.push('/');
 };
-
-const scrollToSection = (event: Event) => {
-  // Si estamos en la homepage, hacer scroll suave
-  if (router.currentRoute.value.path === '/') {
-    event.preventDefault();
-    const target = (event.target as HTMLAnchorElement).getAttribute('href');
-    if (target) {
-      const element = document.querySelector(target.substring(1));
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  }
-  // Si no estamos en homepage, dejar que el link normal funcione
-};
 </script>
 
 <style scoped>
