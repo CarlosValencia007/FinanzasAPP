@@ -11,7 +11,7 @@
         <p class="hero-subtitle">
             Donde puedes manejar tus finanzas de manera fácil y rápida
         </p>
-        <button @click="handleCtaClick" class="cta-button" id="botonEmpezarAhora">
+        <button @click="handleCtaClick" class="cta-button" id="botonEmpezarAhora"  v-if="!isAuthenticated">
             <span>Empezar Ahora</span>
             <svg class="arrow-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -84,8 +84,19 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useAuth } from '../composables/useAuth';
 
+const { checkAuth, getUserEmail } = useAuth();
 const router = useRouter();
+const isAuthenticated = ref(false);
+const userEmail = ref('');
+onMounted(async () => {
+  isAuthenticated.value = await checkAuth();
+  if (isAuthenticated.value) {
+    userEmail.value = getUserEmail.value;
+  }
+});
 
 const handleCtaClick = () => {
     router.push('/login');
