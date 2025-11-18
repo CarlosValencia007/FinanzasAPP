@@ -11,316 +11,388 @@
     </div>
 
     <div v-else class="dashboard-content">
-      <div class="stats-grid">
-        <div class="stat-card income">
-          <div class="stat-icon">
-            <Icon icon="material-symbols:trending-up" width="40" height="40" />
-          </div>
-          <div class="stat-info">
-            <p class="stat-label">Ingresos Totales</p>
-            <p class="stat-value">${{ totalIngresos.toFixed(2) }}</p>
-            <p class="stat-count">{{ ingresos.length }} transacciones</p>
-          </div>
-        </div>
-
-        <div class="stat-card expense">
-          <div class="stat-icon">
-            <Icon icon="material-symbols:trending-down" width="40" height="40" />
-          </div>
-          <div class="stat-info">
-            <p class="stat-label">Gastos Totales</p>
-            <p class="stat-value">${{ totalGastos.toFixed(2) }}</p>
-            <p class="stat-count">{{ gastos.length }} transacciones</p>
-          </div>
-        </div>
-
-        <div class="stat-card balance" :class="{ negative: balance < 0 }">
-          <div class="stat-icon">
-            <Icon icon="material-symbols:account-balance-wallet" width="40" height="40" />
-          </div>
-          <div class="stat-info">
-            <p class="stat-label">Balance Total</p>
-            <p class="stat-value">${{ balance.toFixed(2) }}</p>
-            <p class="stat-count">{{ balance >= 0 ? 'Positivo' : 'Negativo' }}</p>
-          </div>
-        </div>
-
-        <div class="stat-card transactions">
-          <div class="stat-icon">
-            <Icon icon="material-symbols:receipt-long" width="40" height="40" />
-          </div>
-          <div class="stat-info">
-            <p class="stat-label">Total Transacciones</p>
-            <p class="stat-value">{{ transacciones.length }}</p>
-            <p class="stat-count">Este mes</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-grid">
-        <div class="dashboard-card chart-card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <Icon icon="material-symbols:pie-chart" width="24" height="24" />
-              Gastos por Categoría
-            </h3>
-          </div>
-          <div class="card-content">
-            <div v-if="gastosMensuales.length === 0" class="empty-chart">
-              <Icon icon="material-symbols:pie-chart-outline" width="64" height="64" />
-              <p>No hay gastos registrados este mes</p>
+      <section class="stats-section" aria-label="Resumen financiero">
+        <div class="stats-grid">
+          <div class="stat-card income">
+            <div class="stat-icon" aria-hidden="true">
+              <Icon icon="material-symbols:trending-up" width="40" height="40" />
             </div>
-            <div v-else class="chart-container">
-              <div class="chart-wrapper-grid">
-                <div class="pie-chart-section">
-                  <svg class="pie-chart" viewBox="0 0 200 200">
-                    <defs>
-                      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                        <feOffset dx="0" dy="2" result="offsetblur"/>
-                        <feComponentTransfer>
-                          <feFuncA type="linear" slope="0.3"/>
-                        </feComponentTransfer>
-                        <feMerge> 
-                          <feMergeNode/>
-                          <feMergeNode in="SourceGraphic"/> 
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    <g filter="url(#shadow)">
-                      <circle 
-                        v-for="(segment, index) in pieSegments" 
-                        :key="index"
-                        :cx="100" 
-                        :cy="100" 
-                        :r="70"
-                        fill="transparent"
-                        :stroke="segment.color"
-                        :stroke-width="45"
-                        :stroke-dasharray="`${segment.dasharray} ${circumference}`"
-                        :stroke-dashoffset="segment.offset"
-                        transform="rotate(-90 100 100)"
-                        class="pie-segment"
-                        :style="{ animationDelay: `${index * 0.1}s` }"
-                      />
-                    </g>
-                    <circle cx="100" cy="100" r="47.5" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
-                    <text x="100" y="90" text-anchor="middle" class="chart-center-text">Total Gastos</text>
-                    <text x="100" y="115" text-anchor="middle" class="chart-center-value">${{ totalGastos.toFixed(0) }}</text>
-                  </svg>
-                </div>
-                <div class="categories-legend">
-                  <div class="legend-header">
-                    <span class="legend-header-title">Categorías</span>
-                    <span class="legend-header-amount">Monto</span>
-                  </div>
-                  <div 
-                    v-for="(gasto, index) in gastosMensuales" 
-                    :key="gasto.id_categoria"
-                    class="legend-item"
-                    :style="{ animationDelay: `${index * 0.1}s` }"
-                  >
-                    <div class="legend-left">
-                      <div class="legend-color-wrapper">
-                        <div class="legend-color" :style="{ background: gasto.color_categoria }"></div>
-                      </div>
-                      <span class="legend-name">{{ gasto.nombre_categoria }}</span>
-                    </div>
-                    <div class="legend-right">
-                      <span class="legend-amount">${{ gasto.monto_total.toFixed(2) }}</span>
-                      <span class="legend-percentage" :style="{ color: gasto.color_categoria }">
-                        {{ ((gasto.monto_total / totalGastos) * 100).toFixed(1) }}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div class="stat-info">
+              <p class="stat-label">Ingresos Totales</p>
+              <p class="stat-value">${{ totalIngresos.toFixed(2) }}</p>
+              <p class="stat-count">{{ ingresos.length }} transacciones</p>
+            </div>
+          </div>
+
+          <div class="stat-card expense">
+            <div class="stat-icon" aria-hidden="true">
+              <Icon icon="material-symbols:trending-down" width="40" height="40" />
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Gastos Totales</p>
+              <p class="stat-value">${{ totalGastos.toFixed(2) }}</p>
+              <p class="stat-count">{{ gastos.length }} transacciones</p>
+            </div>
+          </div>
+
+          <div class="stat-card balance" :class="{ negative: balance < 0 }">
+            <div class="stat-icon" aria-hidden="true">
+              <Icon icon="material-symbols:account-balance-wallet" width="40" height="40" />
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Balance Total</p>
+              <p class="stat-value">${{ balance.toFixed(2) }}</p>
+              <p class="stat-count">{{ balance >= 0 ? 'Positivo' : 'Negativo' }}</p>
+            </div>
+          </div>
+
+          <div class="stat-card transactions">
+            <div class="stat-icon" aria-hidden="true">
+              <Icon icon="material-symbols:receipt-long" width="40" height="40" />
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Total Transacciones</p>
+              <p class="stat-value">{{ transacciones.length }}</p>
+              <p class="stat-count">Este mes</p>
             </div>
           </div>
         </div>
+      </section>
 
-        <div class="dashboard-card recent-card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <Icon icon="material-symbols:history" width="24" height="24" />
-              Transacciones Recientes
-            </h3>
-            <router-link to="/transactions" class="view-all-link">
-              Ver todas
+      <section class="actions-section" aria-label="Acciones rápidas">
+        <div class="quick-actions">
+          <h3 class="actions-title">Acciones Rápidas</h3>
+          <div class="actions-grid">
+            <button @click="mostrarFormulario = true" class="action-btn primary" aria-label="Agregar nueva transacción">
+              <Icon icon="material-symbols:add-circle" width="24" height="24" aria-hidden="true" />
+              <span>Nueva Transacción</span>
+            </button>
+            <router-link to="/transactions" class="action-btn secondary" aria-label="Ver todas las transacciones">
+              <Icon icon="material-symbols:list" width="24" height="24" aria-hidden="true" />
+              <span>Ver Transacciones</span>
             </router-link>
           </div>
-          <div class="card-content">
-            <div v-if="transaccionesRecientes.length === 0" class="empty-transactions">
-              <Icon icon="material-symbols:receipt-long" width="48" height="48" />
-              <p>No hay transacciones recientes</p>
+        </div>
+      </section>
+
+      <!-- Modal de nueva transacción -->
+      <transition name="fade" mode="out-in">
+        <div v-if="mostrarFormulario" class="modal-overlay" @click.self="mostrarFormulario = false" key="modal">
+          <div class="modal-content-form" @click.stop>
+            <div class="modal-header-form">
+              <h3 class="modal-title-form">
+                <Icon icon="material-symbols:add-circle" width="24" height="24" />
+                Nueva Transacción
+              </h3>
+              <button @click="mostrarFormulario = false" class="modal-close-btn" aria-label="Cerrar">
+                <Icon icon="material-symbols:close" width="24" height="24" />
+              </button>
             </div>
-            <div v-else class="transactions-list-compact">
-              <div 
-                v-for="transaccion in transaccionesRecientes" 
-                :key="transaccion.id"
-                class="transaction-item-compact"
-              >
-                <div 
-                  class="transaction-icon-compact" 
-                  :style="{ background: transaccion.categoria?.color || '#A2D3C7' }"
+            <div class="modal-body-form">
+              <AddTransactionForm 
+                @submit="handleAgregarTransaccion"
+                @cancel="mostrarFormulario = false"
+              />
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <section class="analytics-section" aria-label="Análisis de gastos">
+        <div class="dashboard-grid">
+          <article class="dashboard-card chart-card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <Icon icon="material-symbols:pie-chart" width="24" height="24" aria-hidden="true" />
+                <span class="title-text">{{ tipoGraficoSeleccionado === 'gastos' ? 'Gastos' : 'Ingresos' }} por Categoría</span>
+              </h3>
+              <div class="chart-toggle">
+                <button 
+                  @click="tipoGraficoSeleccionado = 'gastos'" 
+                  class="toggle-btn toggle-gastos"
+                  :class="{ active: tipoGraficoSeleccionado === 'gastos' }"
+                  aria-label="Ver gastos"
                 >
-                  <Icon 
-                    :icon="transaccion.categoria?.icono || 'material-symbols:category'" 
-                    width="20" 
-                    height="20" 
-                  />
-                </div>
-                <div class="transaction-details-compact">
-                  <p class="transaction-category-compact">
-                    {{ transaccion.categoria?.nombre || 'Sin categoría' }}
-                  </p>
-                  <p class="transaction-date-compact">
-                    {{ formatearFechaCorta(transaccion.fecha_transaccion) }}
-                  </p>
-                </div>
-                <p class="transaction-amount-compact" :class="transaccion.tipo">
-                  {{ transaccion.tipo === 'ingreso' ? '+' : '-' }}${{ transaccion.monto.toFixed(2) }}
-                </p>
+                  <Icon icon="material-symbols:trending-down" width="18" height="18" />
+                  Gastos
+                </button>
+                <button 
+                  @click="tipoGraficoSeleccionado = 'ingresos'" 
+                  class="toggle-btn toggle-ingresos"
+                  :class="{ active: tipoGraficoSeleccionado === 'ingresos' }"
+                  aria-label="Ver ingresos"
+                >
+                  <Icon icon="material-symbols:trending-up" width="18" height="18" />
+                  Ingresos
+                </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-card comparison-card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <Icon icon="material-symbols:bar-chart" width="24" height="24" />
-            Comparación Mensual de Gastos
-          </h3>
-        </div>
-        <div class="card-content">
-          <div class="month-selectors">
-            <div class="month-selector">
-              <label class="selector-label">Mes 1</label>
-              <select v-model="mes1Seleccionado" @change="cargarComparacion" class="month-select">
-                <option v-for="mes in mesesDisponibles" :key="mes.value" :value="mes.value">
-                  {{ mes.label }}
-                </option>
-              </select>
-            </div>
-            <Icon icon="material-symbols:compare-arrows" width="32" height="32" class="compare-icon" />
-            <div class="month-selector">
-              <label class="selector-label">Mes 2</label>
-              <select v-model="mes2Seleccionado" @change="cargarComparacion" class="month-select">
-                <option v-for="mes in mesesDisponibles" :key="mes.value" :value="mes.value">
-                  {{ mes.label }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div v-if="cargandoComparacion" class="loading-comparison">
-            <Icon icon="material-symbols:sync" width="32" height="32" class="spinner-small" />
-            <p>Cargando comparación...</p>
-          </div>
-
-          <div v-else-if="datosComparacion.length === 0" class="empty-comparison">
-            <Icon icon="material-symbols:bar-chart" width="48" height="48" />
-            <p>No hay datos para comparar</p>
-          </div>
-
-          <div v-else class="bar-chart-container">
-            <div class="comparison-summary">
-              <div class="summary-item">
-                <span class="summary-label">{{ mes1Label }}</span>
-                <span class="summary-value mes1">${{ totalMes1.toFixed(2) }}</span>
+            <div class="card-content">
+              <div v-if="datosGraficoActual.length === 0" class="empty-chart">
+                <Icon icon="material-symbols:pie-chart-outline" width="64" height="64" aria-hidden="true" />
+                <p>No hay {{ tipoGraficoSeleccionado }} registrados este mes</p>
               </div>
-              <div class="summary-item">
-                <span class="summary-label">{{ mes2Label }}</span>
-                <span class="summary-value mes2">${{ totalMes2.toFixed(2) }}</span>
-              </div>
-              <div class="summary-item difference">
-                <span class="summary-label">Diferencia</span>
-                <span class="summary-value" :class="{ positive: diferenciaMeses < 0, negative: diferenciaMeses > 0 }">
-                  {{ diferenciaMeses > 0 ? '+' : '' }}${{ Math.abs(diferenciaMeses).toFixed(2) }}
-                </span>
-              </div>
-            </div>
-
-            <div class="chart-legend">
-              <div class="legend-item-bar">
-                <div class="legend-color-bar mes1-color"></div>
-                <span>{{ mes1Label }}</span>
-              </div>
-              <div class="legend-item-bar">
-                <div class="legend-color-bar mes2-color"></div>
-                <span>{{ mes2Label }}</span>
-              </div>
-            </div>
-
-            <div class="vertical-bars-wrapper">
-              <div class="bars-chart">
-                <div class="bars-grid">
-                  <div v-for="categoria in datosComparacion" :key="categoria.nombre" class="bar-group-vertical">
-                    <div class="bars-container">
-                      <div class="bar-vertical">
-                        <div 
-                          class="bar-fill-vertical mes1-bar-vertical" 
-                          :style="{ 
-                            height: calcularAlturaBarra(categoria.mes1, maxValorComparacion) + '%'
-                          }"
-                        >
-                          <span class="bar-value-vertical" v-if="categoria.mes1 > 0">
-                            ${{ categoria.mes1.toFixed(0) }}
-                          </span>
+              <div v-else class="chart-container">
+                <div class="chart-wrapper-grid">
+                  <div class="pie-chart-section">
+                    <svg class="pie-chart" viewBox="0 0 200 200" role="img" :aria-label="`Gráfico de pastel de ${tipoGraficoSeleccionado} por categoría`">
+                      <defs>
+                        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                          <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                          <feOffset dx="0" dy="2" result="offsetblur"/>
+                          <feComponentTransfer>
+                            <feFuncA type="linear" slope="0.3"/>
+                          </feComponentTransfer>
+                          <feMerge> 
+                            <feMergeNode/>
+                            <feMergeNode in="SourceGraphic"/> 
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      <g filter="url(#shadow)">
+                        <circle 
+                          v-for="(segment, index) in pieSegmentsActual" 
+                          :key="index"
+                          :cx="100" 
+                          :cy="100" 
+                          :r="70"
+                          fill="transparent"
+                          :stroke="segment.color"
+                          :stroke-width="45"
+                          :stroke-dasharray="`${segment.dasharray} ${circumference}`"
+                          :stroke-dashoffset="segment.offset"
+                          transform="rotate(-90 100 100)"
+                          class="pie-segment"
+                          :style="{ animationDelay: `${index * 0.1}s` }"
+                        />
+                      </g>
+                      <circle cx="100" cy="100" r="47.5" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
+                      <text x="100" y="90" text-anchor="middle" class="chart-center-text">Total {{ tipoGraficoSeleccionado === 'gastos' ? 'Gastos' : 'Ingresos' }}</text>
+                      <text x="100" y="115" text-anchor="middle" class="chart-center-value">${{ totalGraficoActual.toFixed(0) }}</text>
+                    </svg>
+                  </div>
+                  <div class="categories-legend" role="list">
+                    <div class="legend-header">
+                      <span class="legend-header-title">Categorías</span>
+                      <span class="legend-header-amount">Monto</span>
+                    </div>
+                    <div 
+                      v-for="(item, index) in datosGraficoActual" 
+                      :key="item.id_categoria"
+                      class="legend-item"
+                      role="listitem"
+                      :style="{ animationDelay: `${index * 0.1}s` }"
+                    >
+                      <div class="legend-left">
+                        <div class="legend-color-wrapper">
+                          <div class="legend-color" :style="{ background: item.color_categoria }" :aria-label="`Color de ${item.nombre_categoria}`"></div>
                         </div>
+                        <span class="legend-name">{{ item.nombre_categoria }}</span>
                       </div>
-                      <div class="bar-vertical">
-                        <div 
-                          class="bar-fill-vertical mes2-bar-vertical" 
-                          :style="{ 
-                            height: calcularAlturaBarra(categoria.mes2, maxValorComparacion) + '%'
-                          }"
-                        >
-                          <span class="bar-value-vertical" v-if="categoria.mes2 > 0">
-                            ${{ categoria.mes2.toFixed(0) }}
-                          </span>
-                        </div>
+                      <div class="legend-right">
+                        <span class="legend-amount">${{ item.monto_total.toFixed(2) }}</span>
+                        <span class="legend-percentage" :style="{ color: item.color_categoria }">
+                          {{ ((item.monto_total / totalGraficoActual) * 100).toFixed(1) }}%
+                        </span>
                       </div>
                     </div>
-                    <div class="bar-label-vertical">{{ categoria.nombre }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-card recent-card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <Icon icon="material-symbols:history" width="24" height="24" aria-hidden="true" />
+                Transacciones Recientes
+              </h3>
+              <router-link to="/transactions" class="view-all-link" aria-label="Ver todas las transacciones">
+                Ver todas
+              </router-link>
+            </div>
+            <div class="card-content">
+              <div v-if="transaccionesRecientes.length === 0" class="empty-transactions">
+                <Icon icon="material-symbols:receipt-long" width="48" height="48" aria-hidden="true" />
+                <p>No hay transacciones recientes</p>
+              </div>
+              <div v-else class="transactions-list-compact" role="list">
+                <div 
+                  v-for="transaccion in transaccionesRecientes" 
+                  :key="transaccion.id"
+                  class="transaction-item-compact"
+                  role="listitem"
+                >
+                  <div 
+                    class="transaction-icon-compact" 
+                    :style="{ background: transaccion.categoria?.color || '#A2D3C7' }"
+                    :aria-label="`Icono de ${transaccion.categoria?.nombre || 'categoría'}`"
+                  >
+                    <Icon 
+                      :icon="transaccion.categoria?.icono || 'material-symbols:category'" 
+                      width="20" 
+                      height="20"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div class="transaction-details-compact">
+                    <p class="transaction-category-compact">
+                      {{ transaccion.categoria?.nombre || 'Sin categoría' }}
+                    </p>
+                    <p class="transaction-date-compact">
+                      {{ formatearFechaCorta(transaccion.fecha_transaccion) }}
+                    </p>
+                  </div>
+                  <p class="transaction-amount-compact" :class="transaccion.tipo">
+                    {{ transaccion.tipo === 'ingreso' ? '+' : '-' }}${{ transaccion.monto.toFixed(2) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="comparison-section" aria-label="Comparación mensual de gastos">
+        <article class="dashboard-card comparison-card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <Icon icon="material-symbols:bar-chart" width="24" height="24" aria-hidden="true" />
+              Comparación Mensual de Gastos
+            </h3>
+          </div>
+          <div class="card-content">
+            <div class="month-selectors">
+              <div class="month-selector">
+                <label for="mes1-select" class="selector-label">Mes 1</label>
+                <select 
+                  id="mes1-select"
+                  v-model="mes1Seleccionado" 
+                  @change="cargarComparacion" 
+                  class="month-select"
+                  aria-label="Seleccionar primer mes para comparar"
+                >
+                  <option v-for="mes in mesesDisponibles" :key="mes.value" :value="mes.value">
+                    {{ mes.label }}
+                  </option>
+                </select>
+              </div>
+              <Icon icon="material-symbols:compare-arrows" width="24" height="24" class="compare-icon" aria-hidden="true" />
+              <div class="month-selector">
+                <label for="mes2-select" class="selector-label">Mes 2</label>
+                <select 
+                  id="mes2-select"
+                  v-model="mes2Seleccionado" 
+                  @change="cargarComparacion" 
+                  class="month-select"
+                  aria-label="Seleccionar segundo mes para comparar"
+                >
+                  <option v-for="mes in mesesDisponibles" :key="mes.value" :value="mes.value">
+                    {{ mes.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div v-if="cargandoComparacion" class="loading-comparison" role="status" aria-live="polite">
+              <Icon icon="material-symbols:sync" width="32" height="32" class="spinner-small" aria-hidden="true" />
+              <p>Cargando comparación...</p>
+            </div>
+
+            <div v-else-if="datosComparacion.length === 0" class="empty-comparison">
+              <Icon icon="material-symbols:bar-chart" width="48" height="48" aria-hidden="true" />
+              <p>No hay datos para comparar</p>
+            </div>
+
+            <div v-else class="bar-chart-container">
+              <div class="comparison-summary" role="group" aria-label="Resumen de comparación">
+                <div class="summary-item">
+                  <span class="summary-label">{{ mes1Label }}</span>
+                  <span class="summary-value mes1">${{ totalMes1.toFixed(2) }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">{{ mes2Label }}</span>
+                  <span class="summary-value mes2">${{ totalMes2.toFixed(2) }}</span>
+                </div>
+                <div class="summary-item difference">
+                  <span class="summary-label">Diferencia</span>
+                  <span class="summary-value" :class="{ positive: diferenciaMeses < 0, negative: diferenciaMeses > 0 }">
+                    {{ diferenciaMeses > 0 ? '+' : '' }}${{ Math.abs(diferenciaMeses).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="chart-legend" role="list">
+                <div class="legend-item-bar" role="listitem">
+                  <div class="legend-color-bar mes1-color" :aria-label="`Color del ${mes1Label}`"></div>
+                  <span>{{ mes1Label }}</span>
+                </div>
+                <div class="legend-item-bar" role="listitem">
+                  <div class="legend-color-bar mes2-color" :aria-label="`Color del ${mes2Label}`"></div>
+                  <span>{{ mes2Label }}</span>
+                </div>
+              </div>
+
+              <div class="vertical-bars-wrapper">
+                <div class="bars-chart">
+                  <div class="bars-grid" role="img" :aria-label="`Gráfico de barras comparando gastos entre ${mes1Label} y ${mes2Label}`">
+                    <div v-for="categoria in datosComparacion" :key="categoria.nombre" class="bar-group-vertical">
+                      <div class="bars-container">
+                        <div class="bar-vertical">
+                          <div 
+                            class="bar-fill-vertical mes1-bar-vertical" 
+                            :style="{ 
+                              height: calcularAlturaBarra(categoria.mes1, maxValorComparacion) + '%'
+                            }"
+                            :aria-label="`${categoria.nombre} en ${mes1Label}: $${categoria.mes1.toFixed(2)}`"
+                          >
+                            <span class="bar-value-vertical" v-if="categoria.mes1 > 0">
+                              ${{ categoria.mes1.toFixed(0) }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="bar-vertical">
+                          <div 
+                            class="bar-fill-vertical mes2-bar-vertical" 
+                            :style="{ 
+                              height: calcularAlturaBarra(categoria.mes2, maxValorComparacion) + '%'
+                            }"
+                            :aria-label="`${categoria.nombre} en ${mes2Label}: $${categoria.mes2.toFixed(2)}`"
+                          >
+                            <span class="bar-value-vertical" v-if="categoria.mes2 > 0">
+                              ${{ categoria.mes2.toFixed(0) }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="bar-label-vertical">{{ categoria.nombre }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="quick-actions">
-        <h3 class="actions-title">Acciones Rápidas</h3>
-        <div class="actions-grid">
-          <router-link to="/transactions" class="action-btn primary">
-            <Icon icon="material-symbols:add-circle" width="24" height="24" />
-            <span>Nueva Transacción</span>
-          </router-link>
-          <router-link to="/transactions" class="action-btn secondary">
-            <Icon icon="material-symbols:list" width="24" height="24" />
-            <span>Ver Transacciones</span>
-          </router-link>
-        </div>
-      </div>
+        </article>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCategorias } from '../composables/useCategorias'
 import { useEstadisticas } from '../composables/useEstadisticas'
 import { useTransacciones } from '../composables/useTransacciones'
 import { supabase } from '../lib/conectionWithSupabase'
+import AddTransactionForm from './AddTransactionForm.vue'
 
 const router = useRouter()
 const cargando = ref(true)
 const usuarioId = ref<string | null>(null)
+const mostrarFormulario = ref(false)
 
 const {
   transacciones,
@@ -329,7 +401,8 @@ const {
   totalIngresos,
   totalGastos,
   balance,
-  obtenerTransaccionesMesActual
+  obtenerTransaccionesMesActual,
+  crearTransaccion
 } = useTransacciones()
 
 const {
@@ -337,20 +410,37 @@ const {
   obtenerGastosMensualesPorCategoria
 } = useEstadisticas()
 
+const {
+  categorias,
+  obtenerCategorias
+} = useCategorias()
+
+const tipoGraficoSeleccionado = ref<'gastos' | 'ingresos'>('gastos')
+const ingresosMensuales = ref<Array<{ id_categoria: string; nombre_categoria: string; color_categoria: string; icono_categoria: string; monto_total: number; conteo_transacciones: number }>>([])
+
 const transaccionesRecientes = computed(() => {
   return transacciones.value.slice(0, 5)
 })
 
 const circumference = 502.65
-const pieSegments = computed(() => {
-  if (totalGastos.value === 0) return []
+
+const datosGraficoActual = computed(() => {
+  return tipoGraficoSeleccionado.value === 'gastos' ? gastosMensuales.value : ingresosMensuales.value
+})
+
+const totalGraficoActual = computed(() => {
+  return datosGraficoActual.value.reduce((sum, item) => sum + item.monto_total, 0)
+})
+
+const pieSegmentsActual = computed(() => {
+  if (totalGraficoActual.value === 0) return []
   
   let currentOffset = 0
-  return gastosMensuales.value.map(gasto => {
-    const percentage = (gasto.monto_total / totalGastos.value) * 100
+  return datosGraficoActual.value.map(item => {
+    const percentage = (item.monto_total / totalGraficoActual.value) * 100
     const dasharray = (percentage / 100) * circumference
     const segment = {
-      color: gasto.color_categoria,
+      color: item.color_categoria,
       dasharray: dasharray,
       offset: -currentOffset
     }
@@ -417,6 +507,60 @@ const maxValorComparacion = computed(() => {
 function calcularAlturaBarra(valor: number, max: number) {
   if (max === 0) return 0
   return (valor / max) * 100
+}
+
+async function obtenerIngresosMensualesPorCategoria() {
+  if (!usuarioId.value) return
+  
+  try {
+    const ahora = new Date()
+    const mesActual = ahora.getMonth() + 1
+    const anioActual = ahora.getFullYear()
+    
+    const primerDia = new Date(anioActual, mesActual - 1, 1).toISOString().split('T')[0]
+    const ultimoDia = new Date(anioActual, mesActual, 0).toISOString().split('T')[0]
+    
+    const { data: transacciones, error } = await supabase
+      .from('transactions')
+      .select('*, categories(*)')
+      .eq('user_id', usuarioId.value)
+      .eq('type', 'ingreso')
+      .gte('transaction_date', primerDia)
+      .lte('transaction_date', ultimoDia)
+    
+    if (error) throw error
+    
+    const ingresosPorCategoria = new Map<string, { id_categoria: string; nombre_categoria: string; color_categoria: string; icono_categoria: string; monto_total: number; conteo_transacciones: number }>()
+    
+    transacciones?.forEach(t => {
+      const catId = t.category_id || 'sin-categoria'
+      const catNombre = t.categories?.name || 'Sin categoría'
+      const catColor = t.categories?.color || '#A2D3C7'
+      const catIcono = t.categories?.icon || 'material-symbols:category'
+      
+      if (!ingresosPorCategoria.has(catId)) {
+        ingresosPorCategoria.set(catId, {
+          id_categoria: catId,
+          nombre_categoria: catNombre,
+          color_categoria: catColor,
+          icono_categoria: catIcono,
+          monto_total: 0,
+          conteo_transacciones: 0
+        })
+      }
+      
+      const categoria = ingresosPorCategoria.get(catId)!
+      categoria.monto_total += parseFloat(t.amount)
+      categoria.conteo_transacciones += 1
+    })
+    
+    ingresosMensuales.value = Array.from(ingresosPorCategoria.values())
+      .sort((a, b) => b.monto_total - a.monto_total)
+    
+  } catch (error) {
+    console.error('Error al obtener ingresos mensuales:', error)
+    ingresosMensuales.value = []
+  }
 }
 
 async function cargarComparacion() {
@@ -501,11 +645,60 @@ onMounted(async () => {
   await Promise.all([
     obtenerTransaccionesMesActual(user.id),
     obtenerGastosMensualesPorCategoria(user.id),
+    obtenerIngresosMensualesPorCategoria(),
+    obtenerCategorias(user.id),
     cargarComparacion()
   ])
   
   cargando.value = false
 })
+
+watch(tipoGraficoSeleccionado, async () => {
+  if (usuarioId.value && tipoGraficoSeleccionado.value === 'ingresos') {
+    await obtenerIngresosMensualesPorCategoria()
+  }
+})
+
+async function handleAgregarTransaccion(data: { 
+  type: string; 
+  amount: number; 
+  category: string; 
+  description?: string; 
+  date: string 
+}) {
+  if (!usuarioId.value) return
+
+  let categoriaId = categorias.value.find(c => 
+    c.nombre.toLowerCase() === data.category.toLowerCase()
+  )?.id
+
+  const tipoTransaccion = data.type === 'ingreso' ? 'ingreso' : 'gasto' as 'ingreso' | 'gasto'
+
+  if (!categoriaId && categorias.value.length > 0) {
+    const categoriasPorTipo = categorias.value.filter(c => c.tipo === tipoTransaccion)
+    categoriaId = categoriasPorTipo[0]?.id || categorias.value[0].id
+  }
+
+  const nuevaTransaccion = {
+    tipo: tipoTransaccion,
+    monto: data.amount,
+    id_categoria: categoriaId || '',
+    descripcion: data.description,
+    fecha_transaccion: data.date
+  }
+
+  const resultado = await crearTransaccion(usuarioId.value, nuevaTransaccion)
+  
+  if (resultado) {
+    mostrarFormulario.value = false
+    await Promise.all([
+      obtenerTransaccionesMesActual(usuarioId.value),
+      obtenerGastosMensualesPorCategoria(usuarioId.value),
+      obtenerIngresosMensualesPorCategoria(),
+      cargarComparacion()
+    ])
+  }
+}
 
 function formatearFechaCorta(fecha: string) {
   const date = new Date(fecha)
@@ -529,6 +722,7 @@ function formatearFechaCorta(fecha: string) {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .dashboard-header {
@@ -574,13 +768,31 @@ function formatearFechaCorta(fecha: string) {
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 32px;
+}
+
+.stats-section {
+  margin-bottom: 8px;
+}
+
+.actions-section {
+  margin-bottom: 8px;
+}
+
+.analytics-section {
+  margin-bottom: 8px;
+}
+
+.comparison-section {
+  margin-bottom: 8px;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .stat-card {
@@ -676,8 +888,10 @@ function formatearFechaCorta(fecha: string) {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dashboard-card {
@@ -697,6 +911,65 @@ function formatearFechaCorta(fecha: string) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.chart-toggle {
+  display: flex;
+  gap: 8px;
+  background: var(--color-fondo-secundario);
+  padding: 4px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.toggle-btn:hover {
+  opacity: 0.8;
+}
+
+.toggle-gastos.active {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.toggle-gastos:not(.active) {
+  color: #e74c3c;
+}
+
+.toggle-gastos:not(.active):hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.toggle-ingresos.active {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.toggle-ingresos:not(.active) {
+  color: #27ae60;
+}
+
+.toggle-ingresos:not(.active):hover {
+  background: rgba(39, 174, 96, 0.1);
 }
 
 .card-title {
@@ -707,6 +980,11 @@ function formatearFechaCorta(fecha: string) {
   align-items: center;
   gap: 10px;
   margin: 0;
+  min-width: 200px;
+}
+
+.title-text {
+  white-space: nowrap;
 }
 
 .view-all-link {
@@ -975,38 +1253,41 @@ function formatearFechaCorta(fecha: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  margin-bottom: 32px;
-  padding: 20px;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 14px;
   background: linear-gradient(135deg, var(--color-fondo-secundario), rgba(162, 211, 199, 0.1));
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .month-selector {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .selector-label {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .month-select {
-  padding: 12px 16px;
+  padding: 8px 12px;
   border: 2px solid var(--color-acento-suave);
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-texto-oscuro);
   background: white;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 200px;
+  min-width: 160px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .month-select:hover {
@@ -1023,19 +1304,21 @@ function formatearFechaCorta(fecha: string) {
   color: var(--color-cta);
   flex-shrink: 0;
   animation: pulse 2s ease-in-out infinite;
+  width: 24px;
+  height: 24px;
 }
 
 .loading-comparison,
 .empty-comparison {
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 20px;
   color: #999;
 }
 
 .loading-comparison p,
 .empty-comparison p {
-  margin-top: 12px;
-  font-size: 1rem;
+  margin-top: 10px;
+  font-size: 0.9rem;
 }
 
 .spinner-small {
@@ -1049,15 +1332,15 @@ function formatearFechaCorta(fecha: string) {
 
 .comparison-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .summary-item {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(250, 250, 250, 0.9));
-  padding: 20px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 12px;
   text-align: center;
   border: 2px solid transparent;
   transition: all 0.3s ease;
@@ -1075,17 +1358,17 @@ function formatearFechaCorta(fecha: string) {
 
 .summary-label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .summary-value {
   display: block;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--color-texto-oscuro);
 }
@@ -1109,23 +1392,23 @@ function formatearFechaCorta(fecha: string) {
 .chart-legend {
   display: flex;
   justify-content: center;
-  gap: 32px;
-  margin-bottom: 24px;
+  gap: 24px;
+  margin-bottom: 16px;
 }
 
 .legend-item-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 600;
   color: var(--color-texto-oscuro);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .legend-color-bar {
-  width: 24px;
-  height: 16px;
-  border-radius: 4px;
+  width: 20px;
+  height: 14px;
+  border-radius: 3px;
 }
 
 .legend-color-bar.mes1-color {
@@ -1139,14 +1422,14 @@ function formatearFechaCorta(fecha: string) {
 .vertical-bars-wrapper {
   width: 100%;
   overflow-x: auto;
-  padding: 20px 10px;
+  padding: 12px 8px;
 }
 
 .bars-chart {
   min-width: 100%;
-  padding: 20px;
+  padding: 14px;
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -1154,10 +1437,10 @@ function formatearFechaCorta(fecha: string) {
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
-  gap: 24px;
-  min-height: 350px;
-  padding: 20px 0;
-  border-bottom: 3px solid var(--color-acento-suave);
+  gap: 16px;
+  min-height: 240px;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--color-acento-suave);
   position: relative;
 }
 
@@ -1171,9 +1454,9 @@ function formatearFechaCorta(fecha: string) {
   background: repeating-linear-gradient(
     to top,
     transparent,
-    transparent 69px,
-    rgba(162, 211, 199, 0.15) 69px,
-    rgba(162, 211, 199, 0.15) 70px
+    transparent 47px,
+    rgba(162, 211, 199, 0.15) 47px,
+    rgba(162, 211, 199, 0.15) 48px
   );
   pointer-events: none;
 }
@@ -1182,22 +1465,22 @@ function formatearFechaCorta(fecha: string) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex: 1;
-  min-width: 80px;
+  min-width: 70px;
 }
 
 .bars-container {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: flex-end;
-  height: 300px;
+  height: 200px;
   position: relative;
   z-index: 1;
 }
 
 .bar-vertical {
-  width: 45px;
+  width: 38px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -1206,14 +1489,14 @@ function formatearFechaCorta(fecha: string) {
 
 .bar-fill-vertical {
   width: 100%;
-  border-radius: 8px 8px 0 0;
+  border-radius: 6px 6px 0 0;
   transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   animation: barGrowUp 1s ease-out forwards;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 8px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  padding-top: 6px;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: visible;
 }
@@ -1239,7 +1522,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .bar-value-vertical {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: white;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -1249,10 +1532,10 @@ function formatearFechaCorta(fecha: string) {
 
 .bar-label-vertical {
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--color-texto-oscuro);
   text-align: center;
-  max-width: 100px;
+  max-width: 90px;
   word-wrap: break-word;
   line-height: 1.2;
 }
@@ -1262,6 +1545,7 @@ function formatearFechaCorta(fecha: string) {
   border-radius: 20px;
   padding: 28px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  margin-bottom: 0;
 }
 
 .actions-title {
@@ -1315,7 +1599,170 @@ function formatearFechaCorta(fecha: string) {
   transform: translateY(-2px);
 }
 
+.action-btn {
+  border: none;
+  cursor: pointer;
+}
+
+/* Modal de formulario */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content-form {
+  background: white;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 2px solid var(--color-acento-suave);
+  position: sticky;
+  top: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+
+.modal-title-form {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+  background: var(--color-fondo-secundario);
+  color: var(--color-texto-oscuro);
+}
+
+.modal-body-form {
+  padding: 28px;
+  flex: 1;
+}
+
+.fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+
+.fade-enter-to {
+  opacity: 1;
+}
+
+.fade-leave-from {
+  opacity: 1;
+}
+
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active .modal-content-form {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.fade-leave-active .modal-content-form {
+  animation: modalSlideOut 0.3s ease-in;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1400px) {
+  .dashboard-container {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .chart-wrapper-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 0 20px;
+  }
+
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
@@ -1332,6 +1779,33 @@ function formatearFechaCorta(fecha: string) {
   .pie-chart {
     max-width: 240px;
   }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    padding: 24px;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+  }
+
+  .comparison-summary {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .month-selectors {
+    gap: 20px;
+    padding: 16px;
+  }
+
+  .month-select {
+    min-width: 180px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1341,31 +1815,90 @@ function formatearFechaCorta(fecha: string) {
 
   .dashboard-header {
     padding-top: 10px;
+    margin-bottom: 24px;
   }
 
   .dashboard-title {
     font-size: 2rem;
   }
 
+  .dashboard-subtitle {
+    font-size: 1rem;
+  }
+
+  .dashboard-content {
+    gap: 24px;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
   }
 
   .dashboard-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .dashboard-card {
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+  }
+
+  .chart-toggle {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .chart-wrapper-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .pie-chart {
+    max-width: 220px;
   }
 
   .actions-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .action-btn {
+    padding: 14px 20px;
+    font-size: 0.95rem;
   }
 
   .month-selectors {
     flex-direction: column;
     gap: 16px;
+    padding: 16px;
   }
 
   .month-select {
     min-width: 100%;
+    width: 100%;
   }
 
   .compare-icon {
@@ -1374,23 +1907,336 @@ function formatearFechaCorta(fecha: string) {
 
   .comparison-summary {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .bars-grid {
-    gap: 16px;
+  .summary-item {
+    padding: 16px;
   }
 
-  .bar-group-vertical {
-    min-width: 60px;
-  }
-
-  .bar-vertical {
-    width: 35px;
+  .summary-value {
+    font-size: 1.3rem;
   }
 
   .chart-legend {
     flex-direction: column;
     gap: 12px;
+    align-items: center;
+  }
+
+  .bars-grid {
+    gap: 12px;
+    min-height: 200px;
+    padding: 10px 0;
+  }
+
+  .bars-container {
+    height: 160px;
+  }
+
+  .bar-group-vertical {
+    min-width: 55px;
+  }
+
+  .bar-vertical {
+    width: 30px;
+  }
+
+  .bar-label-vertical {
+    font-size: 0.75rem;
+    max-width: 80px;
+  }
+
+  .vertical-bars-wrapper {
+    padding: 10px 5px;
+  }
+
+  .bars-chart {
+    padding: 12px;
+  }
+
+  .legend-item {
+    padding: 12px;
+  }
+
+  .categories-legend {
+    gap: 8px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-content-form {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .modal-header-form {
+    padding: 20px;
+  }
+
+  .modal-title-form {
+    font-size: 1.3rem;
+  }
+
+  .modal-body-form {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 0 12px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-title {
+    font-size: 1.75rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .stats-grid {
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+  }
+
+  .stat-count {
+    font-size: 0.8rem;
+  }
+
+  .dashboard-card {
+    padding: 16px;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    gap: 8px;
+  }
+
+  .card-header {
+    margin-bottom: 16px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chart-toggle {
+    width: 100%;
+  }
+
+  .toggle-btn {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .pie-chart {
+    max-width: 200px;
+  }
+
+  .chart-center-value {
+    font-size: 18px;
+  }
+
+  .chart-center-text {
+    font-size: 9px;
+  }
+
+  .legend-header {
+    padding: 6px 12px;
+    margin-bottom: 6px;
+  }
+
+  .legend-item {
+    padding: 10px 12px;
+  }
+
+  .legend-name {
+    font-size: 0.85rem;
+  }
+
+  .legend-amount {
+    font-size: 0.85rem;
+  }
+
+  .legend-percentage {
+    font-size: 0.8rem;
+    padding: 3px 10px;
+  }
+
+  .transaction-item-compact {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .transaction-icon-compact {
+    width: 36px;
+    height: 36px;
+  }
+
+  .transaction-category-compact {
+    font-size: 0.9rem;
+  }
+
+  .transaction-amount-compact {
+    font-size: 1rem;
+  }
+
+  .action-btn {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .actions-title {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+
+  .month-selectors {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .selector-label {
+    font-size: 0.7rem;
+  }
+
+  .month-select {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .comparison-summary {
+    gap: 10px;
+  }
+
+  .summary-item {
+    padding: 12px;
+  }
+
+  .summary-label {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+  }
+
+  .summary-value {
+    font-size: 1.1rem;
+  }
+
+  .bars-grid {
+    gap: 10px;
+    min-height: 180px;
+    padding: 8px 0;
+  }
+
+  .bars-container {
+    height: 140px;
+  }
+
+  .bar-group-vertical {
+    min-width: 50px;
+    gap: 6px;
+  }
+
+  .bar-vertical {
+    width: 28px;
+  }
+
+  .bar-label-vertical {
+    font-size: 0.7rem;
+    max-width: 70px;
+  }
+
+  .bar-value-vertical {
+    font-size: 0.65rem;
+  }
+
+  .vertical-bars-wrapper {
+    padding: 8px 4px;
+  }
+
+  .bars-chart {
+    padding: 10px;
+  }
+
+  .chart-legend {
+    gap: 10px;
+  }
+
+  .legend-item-bar {
+    font-size: 0.8rem;
+  }
+
+  .legend-color-bar {
+    width: 18px;
+    height: 12px;
+  }
+
+  .modal-content-form {
+    border-radius: 12px;
+  }
+
+  .modal-header-form {
+    padding: 16px;
+  }
+
+  .modal-title-form {
+    font-size: 1.2rem;
+  }
+
+  .modal-body-form {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .pie-chart {
+    max-width: 180px;
+  }
+
+  .bars-grid {
+    min-height: 160px;
+  }
+
+  .bars-container {
+    height: 120px;
+  }
+
+  .bar-vertical {
+    width: 24px;
   }
 }
 </style>

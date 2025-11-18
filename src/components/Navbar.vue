@@ -6,7 +6,9 @@
     </div>
 
     <ul class="nav-links">
-      <router-link to="/" exact>Inicio</router-link>
+      <template v-if="!isAuthenticated">
+        <router-link to="/" exact>Inicio</router-link>
+      </template>
       
       <!-- Mostrar Dashboard y Transacciones solo si está autenticado -->
       <template v-if="isAuthenticated">
@@ -15,7 +17,6 @@
       </template>
       <!-- Mostrar según estado de autenticación -->
       <template v-if="isAuthenticated">
-        <span class="user-email">{{ userEmail }}</span>
         <button @click="handleLogout" class="logout-nav-button">Cerrar Sesión</button>
       </template>
       <template v-else>
@@ -121,13 +122,6 @@ nav {
   height: 3px;
   background: #A2D3C7;
   border-radius: 2px;
-}
-.user-email {
-  color: #A2D3C7;
-  font-weight: 600;
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
 }
 .login-nav-link {
   background: linear-gradient(135deg, #A2D3C7, #8BC9BD);

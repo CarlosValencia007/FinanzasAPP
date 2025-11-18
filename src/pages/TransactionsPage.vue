@@ -6,13 +6,13 @@
         <h1 class="page-title">Mis Transacciones</h1>
         <p class="page-subtitle">Administra tus ingresos y gastos</p>
       </div>
-      <button @click="mostrarFormulario = !mostrarFormulario" class="btn-add">
+      <button @click="mostrarFormulario = true" class="btn-add">
         <Icon 
-          :icon="mostrarFormulario ? 'material-symbols:close' : 'material-symbols:add'" 
+          icon="material-symbols:add" 
           width="24" 
           height="24" 
         />
-        {{ mostrarFormulario ? 'Cerrar' : 'Nueva Transacción' }}
+        Nueva Transacción
       </button>
     </div>
 
@@ -52,13 +52,26 @@
       </div>
     </div>
 
-    <!-- Formulario de agregar transacción -->
-    <transition name="slide-fade" mode="out-in">
-      <div v-if="mostrarFormulario" class="form-container" key="form">
-        <AddTransactionForm 
-          @submit="handleAgregarTransaccion"
-          @cancel="mostrarFormulario = false"
-        />
+    <!-- Modal de nueva transacción -->
+    <transition name="fade" mode="out-in">
+      <div v-if="mostrarFormulario" class="modal-overlay" @click.self="mostrarFormulario = false" key="modal">
+        <div class="modal-content-form" @click.stop>
+          <div class="modal-header-form">
+            <h3 class="modal-title-form">
+              <Icon icon="material-symbols:add-circle" width="24" height="24" />
+              Nueva Transacción
+            </h3>
+            <button @click="mostrarFormulario = false" class="modal-close-btn" aria-label="Cerrar">
+              <Icon icon="material-symbols:close" width="24" height="24" />
+            </button>
+          </div>
+          <div class="modal-body-form">
+            <AddTransactionForm 
+              @submit="handleAgregarTransaccion"
+              @cancel="mostrarFormulario = false"
+            />
+          </div>
+        </div>
       </div>
     </transition>
 
@@ -628,10 +641,79 @@ function formatearFecha(fecha: string) {
   color: #999;
 }
 
-/* Formulario */
-.form-container {
-  max-width: 1200px;
-  margin: 0 auto 32px;
+/* Modal de formulario */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content-form {
+  background: white;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 2px solid var(--color-acento-suave);
+  position: sticky;
+  top: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+
+.modal-title-form {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+  background: var(--color-fondo-secundario);
+  color: var(--color-texto-oscuro);
+}
+
+.modal-body-form {
+  padding: 28px;
+  flex: 1;
 }
 
 /* Filtros */
@@ -986,28 +1068,58 @@ function formatearFecha(fecha: string) {
 }
 
 /* Animaciones */
-.slide-fade-enter-active {
+.fade-enter-active {
   transition: all 0.3s ease-out;
 }
 
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+.fade-leave-active {
+  transition: all 0.3s ease-in;
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(-20px);
+.fade-enter-from {
   opacity: 0;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.fade-enter-to {
+  opacity: 1;
 }
 
-.fade-enter-from,
+.fade-leave-from {
+  opacity: 1;
+}
+
 .fade-leave-to {
   opacity: 0;
+}
+
+.fade-enter-active .modal-content-form {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.fade-leave-active .modal-content-form {
+  animation: modalSlideOut 0.3s ease-in;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
 }
 
 /* Responsive */
@@ -1049,6 +1161,46 @@ function formatearFecha(fecha: string) {
 
   .modal-content {
     padding: 24px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-content-form {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .modal-header-form {
+    padding: 20px;
+  }
+
+  .modal-title-form {
+    font-size: 1.3rem;
+  }
+
+  .modal-body-form {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-form {
+    border-radius: 12px;
+  }
+
+  .modal-header-form {
+    padding: 16px;
+  }
+
+  .modal-title-form {
+    font-size: 1.2rem;
+  }
+
+  .modal-body-form {
+    padding: 16px;
   }
 }
 </style>
