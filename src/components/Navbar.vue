@@ -5,27 +5,32 @@
       <router-link to="/">FINANZAPP</router-link>
     </div>
 
-    <ul class="nav-links">
+    <ul class="nav-links" :class="{ 'nav-links-open': menuOpen }">
       <template v-if="!isAuthenticated">
-        <router-link to="/" exact>Inicio</router-link>
+        <router-link to="/" exact @click="cerrarMenu">Inicio</router-link>
       </template>
       
       <!-- Mostrar Dashboard y Transacciones solo si está autenticado -->
       <template v-if="isAuthenticated">
-        <router-link to="/dashboard">Dashboard</router-link>
-        <router-link to="/transactions">Transacciones</router-link>
+        <router-link to="/dashboard" @click="cerrarMenu">Dashboard</router-link>
+        <router-link to="/transactions" @click="cerrarMenu">Transacciones</router-link>
       </template>
       <!-- Mostrar según estado de autenticación -->
       <template v-if="isAuthenticated">
         <button @click="handleLogout" class="logout-nav-button">Cerrar Sesión</button>
       </template>
       <template v-else>
-        <router-link to="/login" class="login-nav-link">Iniciar Sesión</router-link>
-        <router-link to="/register" class="register-nav-link">Registrarse</router-link>
+        <router-link to="/login" class="login-nav-link" @click="cerrarMenu">Iniciar Sesión</router-link>
+        <router-link to="/register" class="register-nav-link" @click="cerrarMenu">Registrarse</router-link>
       </template>
     </ul>
 
-    <button class="menu-toggle" aria-label="Abrir menú">
+    <button 
+      class="menu-toggle" 
+      :class="{ 'menu-toggle-open': menuOpen }"
+      @click="toggleMenu"
+      :aria-label="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
+    >
       <span></span>
       <span></span>
       <span></span>
@@ -44,6 +49,15 @@ const { checkAuth, logout, getUserEmail } = useAuth();
 
 const isAuthenticated = ref(false);
 const userEmail = ref('');
+const menuOpen = ref(false);
+
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value;
+}
+
+function cerrarMenu() {
+  menuOpen.value = false;
+}
 
 // Verificar autenticación al montar el componente
 onMounted(async () => {
@@ -59,12 +73,14 @@ router.afterEach(async () => {
   if (isAuthenticated.value) {
     userEmail.value = getUserEmail.value;
   }
+  cerrarMenu();
 });
 
 const handleLogout = async () => {
   await logout();
   isAuthenticated.value = false;
   userEmail.value = '';
+  cerrarMenu();
   router.push('/');
 };
 </script>
@@ -188,11 +204,67 @@ ul{
   font-size: 0.5rem;
 }
 @media (max-width: 768px) {
+  header {
+    padding: 1rem;
+  }
+
   .nav-links {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #35495e 0%, #2c3e50 100%);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+
+  .nav-links.nav-links-open {
+    transform: translateX(0);
+    display: flex;
+  }
+
+  .nav-links a,
+  .nav-links button {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .nav-links a.active-link::after,
+  .nav-links a.router-link-active::after {
     display: none;
   }
+
   .menu-toggle {
     display: flex;
+    z-index: 1001;
+    position: relative;
+  }
+
+  .menu-toggle span {
+    transition: all 0.3s ease;
+  }
+
+  .menu-toggle-open span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+  }
+
+  .menu-toggle-open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-toggle-open span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
   }
 }
 
