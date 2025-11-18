@@ -152,18 +152,22 @@
                       <g filter="url(#shadow)">
                         <circle 
                           v-for="(segment, index) in pieSegmentsActual" 
-                          :key="index"
+                          :key="`segment-${index}-${segment.color}-${segment.nombre}`"
                           :cx="100" 
                           :cy="100" 
                           :r="70"
                           fill="transparent"
                           :stroke="segment.color"
                           :stroke-width="45"
-                          :stroke-dasharray="`${segment.dasharray} ${circumference}`"
+                          :stroke-dasharray="segment.dasharrayString"
                           :stroke-dashoffset="segment.offset"
+                          :stroke-linecap="index === pieSegmentsActual.length - 1 ? 'round' : 'butt'"
                           transform="rotate(-90 100 100)"
                           class="pie-segment"
                           :style="{ animationDelay: `${index * 0.1}s` }"
+                          @mouseenter="mostrarTooltip($event, segment)"
+                          @mouseleave="ocultarTooltip"
+                          @mousemove="onMouseMoveSegment($event, segment)"
                         />
                       </g>
                       <circle cx="100" cy="100" r="47.5" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
@@ -192,11 +196,23 @@
                       <div class="legend-right">
                         <span class="legend-amount">${{ item.monto_total.toFixed(2) }}</span>
                         <span class="legend-percentage" :style="{ color: item.color_categoria }">
-                          {{ ((item.monto_total / totalGraficoActual) * 100).toFixed(1) }}%
+                          {{ ((item.monto_total / totalGraficoActual) * 100).toFixed(2) }}%
                         </span>
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+              
+              <div 
+                v-if="tooltipVisible && tooltipData" 
+                class="pie-tooltip"
+                :style="{ left: tooltipData.x + 10 + 'px', top: tooltipData.y - 10 + 'px' }"
+              >
+                <div class="tooltip-content">
+                  <div class="tooltip-title">{{ tooltipData.nombre }}</div>
+                  <div class="tooltip-amount">${{ tooltipData.monto.toFixed(2) }}</div>
+                  <div class="tooltip-percentage">{{ tooltipData.porcentaje.toFixed(1) }}%</div>
                 </div>
               </div>
             </div>
@@ -425,29 +441,102 @@ const transaccionesRecientes = computed(() => {
 const circumference = 502.65
 
 const datosGraficoActual = computed(() => {
-  return tipoGraficoSeleccionado.value === 'gastos' ? gastosMensuales.value : ingresosMensuales.value
+  const datos = tipoGraficoSeleccionado.value === 'gastos' ? gastosMensuales.value : ingresosMensuales.value
+  return datos.map((item, index) => ({
+    ...item,
+    color_categoria: obtenerColorUnico(index, item.color_categoria, tipoGraficoSeleccionado.value)
+  }))
 })
 
 const totalGraficoActual = computed(() => {
   return datosGraficoActual.value.reduce((sum, item) => sum + item.monto_total, 0)
 })
 
+const coloresIngresos = [
+  '#2ECC71',
+  '#3498DB',
+  '#9B59B6',
+  '#E67E22',
+  '#1ABC9C',
+  '#F39C12',
+  '#E74C3C',
+  '#16A085',
+  '#2980B9',
+  '#8E44AD'
+]
+
+function obtenerColorUnico(index: number, colorOriginal: string, tipo: 'gastos' | 'ingresos'): string {
+  if (tipo === 'ingresos') {
+    return coloresIngresos[index % coloresIngresos.length]
+  }
+  return colorOriginal
+}
+
 const pieSegmentsActual = computed(() => {
   if (totalGraficoActual.value === 0) return []
   
+  const total = totalGraficoActual.value
   let currentOffset = 0
-  return datosGraficoActual.value.map(item => {
-    const percentage = (item.monto_total / totalGraficoActual.value) * 100
-    const dasharray = (percentage / 100) * circumference
+  
+  const segments = datosGraficoActual.value.map((item, index) => {
+    const percentage = (item.monto_total / total) * 100
+    let dasharray = (percentage / 100) * circumference
+    
+    if (dasharray < 1 && dasharray > 0) {
+      dasharray = 1
+    }
+    
+    const colorFinal = obtenerColorUnico(index, item.color_categoria, tipoGraficoSeleccionado.value)
     const segment = {
-      color: item.color_categoria,
+      color: colorFinal,
       dasharray: dasharray,
-      offset: -currentOffset
+      dasharrayString: `${dasharray} ${circumference}`,
+      offset: -currentOffset,
+      nombre: item.nombre_categoria,
+      monto: item.monto_total,
+      porcentaje: percentage
     }
     currentOffset += dasharray
     return segment
   })
+  
+  return segments
 })
+
+const tooltipVisible = ref(false)
+const tooltipData = ref<{ nombre: string; monto: number; porcentaje: number; x: number; y: number } | null>(null)
+
+function mostrarTooltip(event: MouseEvent, segment: { nombre: string; monto: number; porcentaje: number }) {
+  tooltipVisible.value = true
+  tooltipData.value = {
+    nombre: segment.nombre,
+    monto: segment.monto,
+    porcentaje: segment.porcentaje,
+    x: event.clientX,
+    y: event.clientY
+  }
+}
+
+function ocultarTooltip() {
+  tooltipVisible.value = false
+  tooltipData.value = null
+}
+
+function onMouseMoveSegment(event: MouseEvent, segment: { nombre: string; monto: number; porcentaje: number }) {
+  if (!tooltipVisible.value) {
+    tooltipVisible.value = true
+    tooltipData.value = {
+      nombre: segment.nombre,
+      monto: segment.monto,
+      porcentaje: segment.porcentaje,
+      x: event.clientX,
+      y: event.clientY
+    }
+  } else if (tooltipData.value) {
+    tooltipData.value.x = event.clientX
+    tooltipData.value.y = event.clientY
+  }
+}
 
 const mes1Seleccionado = ref('')
 const mes2Seleccionado = ref('')
@@ -555,6 +644,7 @@ async function obtenerIngresosMensualesPorCategoria() {
     })
     
     ingresosMensuales.value = Array.from(ingresosPorCategoria.values())
+      .filter(item => item.monto_total > 0)
       .sort((a, b) => b.monto_total - a.monto_total)
     
   } catch (error) {
@@ -1061,6 +1151,57 @@ function formatearFechaCorta(fecha: string) {
 .pie-segment:hover {
   stroke-width: 50;
   filter: brightness(1.15) saturate(1.2);
+}
+
+.pie-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+}
+
+.tooltip-content {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 0.9rem;
+  min-width: 150px;
+  backdrop-filter: blur(10px);
+}
+
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.9);
+}
+
+.tooltip-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: white;
+}
+
+.tooltip-amount {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #A2D3C7;
+  margin-bottom: 4px;
+}
+
+.tooltip-percentage {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .chart-center-text {
