@@ -427,7 +427,6 @@ const {
 } = useEstadisticas()
 
 const {
-  categorias,
   obtenerCategorias
 } = useCategorias()
 
