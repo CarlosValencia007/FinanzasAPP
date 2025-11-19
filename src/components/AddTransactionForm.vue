@@ -21,7 +21,7 @@
         >
           <option value="">Selecciona tipo</option>
           <option value="ingreso">Ingreso</option>
-          <option value="egreso">Egreso</option>
+          <option value="gasto">Egreso</option>
         </select>
       </div>
 
@@ -48,28 +48,28 @@
           <Icon icon="material-symbols:label" width="20" height="20" class="label-icon" />
           Categoría
         </label>
-        <input 
+        <select
           id="category"
           name="category"
-          type="text" 
-          v-model="formData.category" 
-          class="form-input"
-          placeholder="Ej: Salario, Comida, Transporte"
-          list="category-suggestions"
+          v-model="formData.categoryId"
+          class="form-select category-select"
+          :disabled="!formData.type"
           required
-        />
-        <datalist id="category-suggestions">
-          <option value="Salario" />
-          <option value="Freelance" />
-          <option value="Beca" />
-          <option value="Alimentación" />
-          <option value="Transporte" />
-          <option value="Educación" />
-          <option value="Entretenimiento" />
-          <option value="Salud" />
-          <option value="Vivienda" />
-          <option value="Otros" />
-        </datalist>
+        >
+          <option value="">{{ formData.type ? 'Selecciona categoría' : 'Primero selecciona el tipo' }}</option>
+          <option 
+            v-for="categoria in categoriasFiltradas" 
+            :key="categoria.id" 
+            :value="categoria.id"
+          >
+            {{ categoria.nombre }}
+          </option>
+        </select>
+        <div v-if="formData.categoryId" class="selected-category-preview">
+          <Icon :icon="getCategoriaSeleccionada?.icono || 'material-symbols:label'" width="20" height="20" />
+          <span>{{ getCategoriaSeleccionada?.nombre }}</span>
+        </div>
+        <p v-if="!formData.type" class="field-hint">Selecciona primero el tipo de transacción</p>
       </div>
 
       <div class="form-group full-width">
@@ -136,21 +136,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useCategorias } from '../composables/useCategorias'
+import { supabase } from '../lib/conectionWithSupabase'
 
 const emit = defineEmits<{
-  submit: [data: { type: string; amount: number; category: string; description?: string; date: string }]
+  submit: [data: { type: string; amount: number; categoryId: string; description?: string; date: string }]
   cancel: []
 }>()
 
 interface TransactionData {
-  type: 'ingreso' | 'egreso' | ''
+  type: 'ingreso' | 'gasto' | ''
   amount: number | null
-  category: string
+  categoryId: string
   description: string
   date: string
 }
+
+const { categoriasIngresos, categoriasGastos, obtenerCategorias } = useCategorias()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -162,9 +166,36 @@ const today = new Date().toISOString().split('T')[0]
 const formData = reactive<TransactionData>({
   type: '',
   amount: null,
-  category: '',
+  categoryId: '',
   description: '',
   date: today
+})
+
+// Cargar categorías al montar el componente
+onMounted(async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user?.id) {
+    await obtenerCategorias(user.id)
+  }
+})
+
+// Categorías filtradas según el tipo de transacción
+const categoriasFiltradas = computed(() => {
+  if (!formData.type) return []
+  
+  if (formData.type === 'ingreso') {
+    return categoriasIngresos.value
+  } else if (formData.type === 'gasto') {
+    return categoriasGastos.value
+  }
+  
+  return []
+})
+
+// Obtener categoría seleccionada
+const getCategoriaSeleccionada = computed(() => {
+  if (!formData.categoryId) return null
+  return categoriasFiltradas.value.find(c => c.id === formData.categoryId)
 })
 
 // Validar formulario
@@ -173,15 +204,14 @@ const isFormValid = computed(() => {
     formData.type && 
     formData.amount && 
     formData.amount > 0 && 
-    formData.category.trim() &&
+    formData.categoryId &&
     formData.date
   )
 })
 
-// Cambio de tipo
+// Cambio de tipo - limpiar categoría seleccionada
 const onTypeChange = () => {
-  // Limpiar categoría al cambiar tipo para sugerir categorías apropiadas
-  if (!formData.category) return
+  formData.categoryId = ''
 }
 
 const handleSubmit = () => {
@@ -197,7 +227,7 @@ const handleSubmit = () => {
     emit('submit', {
       type: formData.type,
       amount: formData.amount!,
-      category: formData.category.trim(),
+      categoryId: formData.categoryId,
       description: formData.description.trim() || undefined,
       date: formData.date
     })
@@ -221,7 +251,7 @@ const handleCancel = () => {
 const resetForm = () => {
   formData.type = ''
   formData.amount = null
-  formData.category = ''
+  formData.categoryId = ''
   formData.description = ''
   formData.date = today
   error.value = null
@@ -393,6 +423,33 @@ const resetForm = () => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.field-hint {
+  font-size: 0.875rem;
+  color: #888;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.category-select {
+  margin-bottom: 8px;
+}
+
+.selected-category-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(44, 95, 141, 0.05));
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-texto-oscuro);
+}
+
+.selected-category-preview svg {
+  color: #4A90E2;
 }
 
 @media (min-width: 768px) {

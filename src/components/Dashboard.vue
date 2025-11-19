@@ -752,27 +752,18 @@ watch(tipoGraficoSeleccionado, async () => {
 async function handleAgregarTransaccion(data: { 
   type: string; 
   amount: number; 
-  category: string; 
+  categoryId: string; 
   description?: string; 
   date: string 
 }) {
   if (!usuarioId.value) return
 
-  let categoriaId = categorias.value.find(c => 
-    c.nombre.toLowerCase() === data.category.toLowerCase()
-  )?.id
-
   const tipoTransaccion = data.type === 'ingreso' ? 'ingreso' : 'gasto' as 'ingreso' | 'gasto'
-
-  if (!categoriaId && categorias.value.length > 0) {
-    const categoriasPorTipo = categorias.value.filter(c => c.tipo === tipoTransaccion)
-    categoriaId = categoriasPorTipo[0]?.id || categorias.value[0].id
-  }
 
   const nuevaTransaccion = {
     tipo: tipoTransaccion,
     monto: data.amount,
-    id_categoria: categoriaId || '',
+    id_categoria: data.categoryId,
     descripcion: data.description,
     fecha_transaccion: data.date
   }
