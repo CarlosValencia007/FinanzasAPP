@@ -848,7 +848,7 @@ function formatearFechaCorta(fecha: string) {
 
 .spinner {
   animation: spin 1s linear infinite;
-  color: var(--color-cta);
+  color: #4A90E2;
 }
 
 @keyframes spin {
@@ -903,7 +903,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .stat-card.income {
-  border-left-color: #27ae60;
+  border-left-color: #4A90E2;
 }
 
 .stat-card.expense {
@@ -911,7 +911,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .stat-card.balance {
-  border-left-color: #3498db;
+  border-left-color: #4A90E2;
 }
 
 .stat-card.balance.negative {
@@ -919,7 +919,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .stat-card.transactions {
-  border-left-color: var(--color-cta);
+  border-left-color: #2C5F8D;
 }
 
 .stat-icon {
@@ -934,7 +934,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .stat-card.income .stat-icon {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
 }
 
 .stat-card.expense .stat-icon {
@@ -942,7 +942,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .stat-card.balance .stat-icon {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #4A90E2, #0D2847);
 }
 
 .stat-card.balance.negative .stat-icon {
@@ -950,7 +950,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .stat-card.transactions .stat-icon {
-  background: linear-gradient(135deg, var(--color-cta), #8BC9BD);
+  background: linear-gradient(135deg, #2C5F8D, #0D2847);
 }
 
 .stat-info {
@@ -1008,7 +1008,7 @@ function formatearFechaCorta(fecha: string) {
 .chart-toggle {
   display: flex;
   gap: 8px;
-  background: var(--color-fondo-secundario);
+  background: #F8FAFB;
   padding: 4px;
   border-radius: 12px;
   flex-shrink: 0;
@@ -1049,17 +1049,17 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .toggle-ingresos.active {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
   color: white;
-  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
 }
 
 .toggle-ingresos:not(.active) {
-  color: #27ae60;
+  color: #4A90E2;
 }
 
 .toggle-ingresos:not(.active):hover {
-  background: rgba(39, 174, 96, 0.1);
+  background: rgba(74, 144, 226, 0.1);
 }
 
 .card-title {
@@ -1078,7 +1078,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .view-all-link {
-  color: var(--color-cta);
+  color: #4A90E2;
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
@@ -1086,7 +1086,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .view-all-link:hover {
-  color: var(--color-acento-vibrante);
+  color: #2C5F8D;
 }
 
 .card-content {
@@ -1229,7 +1229,7 @@ function formatearFechaCorta(fecha: string) {
   justify-content: space-between;
   padding: 8px 16px;
   margin-bottom: 8px;
-  border-bottom: 2px solid var(--color-acento-suave);
+  border-bottom: 2px solid #E8F2FB;
 }
 
 .legend-header-title,
@@ -1264,7 +1264,7 @@ function formatearFechaCorta(fecha: string) {
 
 .legend-item:hover {
   background: white;
-  border-color: var(--color-acento-suave);
+  border-color: #E8F2FB;
   transform: translateX(6px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
@@ -1317,7 +1317,7 @@ function formatearFechaCorta(fecha: string) {
   min-width: 50px;
   text-align: right;
   padding: 4px 12px;
-  background: rgba(162, 211, 199, 0.1);
+  background: rgba(74, 144, 226, 0.08);
   border-radius: 8px;
 }
 
@@ -1332,13 +1332,13 @@ function formatearFechaCorta(fecha: string) {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: var(--color-fondo-secundario);
+  background: #F8FAFB;
   border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 .transaction-item-compact:hover {
-  background: #e8e8e8;
+  background: #E8F2FB;
   transform: translateX(4px);
 }
 
@@ -1379,7 +1379,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .transaction-amount-compact.ingreso {
-  color: #27ae60;
+  color: #4A90E2;
 }
 
 .transaction-amount-compact.gasto {
@@ -1397,7 +1397,7 @@ function formatearFechaCorta(fecha: string) {
   gap: 16px;
   margin-bottom: 20px;
   padding: 14px;
-  background: linear-gradient(135deg, var(--color-fondo-secundario), rgba(162, 211, 199, 0.1));
+  background: linear-gradient(135deg, #F8FAFB, rgba(74, 144, 226, 0.05));
   border-radius: 12px;
 }
 
@@ -1417,7 +1417,7 @@ function formatearFechaCorta(fecha: string) {
 
 .month-select {
   padding: 8px 12px;
-  border: 2px solid var(--color-acento-suave);
+  border: 2px solid #E8F2FB;
   border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 600;
@@ -1432,17 +1432,17 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .month-select:hover {
-  border-color: var(--color-cta);
+  border-color: #4A90E2;
 }
 
 .month-select:focus {
   outline: none;
-  border-color: var(--color-cta);
-  box-shadow: 0 0 0 3px rgba(162, 211, 199, 0.2);
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
 .compare-icon {
-  color: var(--color-cta);
+  color: #4A90E2;
   flex-shrink: 0;
   animation: pulse 2s ease-in-out infinite;
   width: 24px;
@@ -1464,7 +1464,7 @@ function formatearFechaCorta(fecha: string) {
 
 .spinner-small {
   animation: spin 1s linear infinite;
-  color: var(--color-cta);
+  color: #4A90E2;
 }
 
 .bar-chart-container {
@@ -1488,13 +1488,13 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .summary-item:hover {
-  border-color: var(--color-acento-suave);
+  border-color: #E8F2FB;
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .summary-item.difference {
-  background: linear-gradient(135deg, rgba(162, 211, 199, 0.2), rgba(162, 211, 199, 0.1));
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.05));
 }
 
 .summary-label {
@@ -1515,7 +1515,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .summary-value.mes1 {
-  color: #3498db;
+  color: #4A90E2;
 }
 
 .summary-value.mes2 {
@@ -1523,7 +1523,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .summary-value.positive {
-  color: #27ae60;
+  color: #4A90E2;
 }
 
 .summary-value.negative {
@@ -1553,7 +1553,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .legend-color-bar.mes1-color {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
 }
 
 .legend-color-bar.mes2-color {
@@ -1581,7 +1581,7 @@ function formatearFechaCorta(fecha: string) {
   gap: 16px;
   min-height: 240px;
   padding: 12px 0;
-  border-bottom: 2px solid var(--color-acento-suave);
+  border-bottom: 2px solid #E8F2FB;
   position: relative;
 }
 
@@ -1596,8 +1596,8 @@ function formatearFechaCorta(fecha: string) {
     to top,
     transparent,
     transparent 47px,
-    rgba(162, 211, 199, 0.15) 47px,
-    rgba(162, 211, 199, 0.15) 48px
+    rgba(74, 144, 226, 0.08) 47px,
+    rgba(74, 144, 226, 0.08) 48px
   );
   pointer-events: none;
 }
@@ -1649,7 +1649,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .bar-fill-vertical.mes1-bar-vertical {
-  background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+  background: linear-gradient(180deg, #4A90E2 0%, #2C5F8D 100%);
 }
 
 .bar-fill-vertical.mes2-bar-vertical {
@@ -1716,28 +1716,31 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .action-btn.primary {
-  background: linear-gradient(135deg, var(--color-cta), #8BC9BD);
-  color: var(--color-texto-oscuro);
-  box-shadow: 0 4px 15px rgba(162, 211, 199, 0.3);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
+  color: white;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
 }
 
 .action-btn.primary:hover {
-  background: linear-gradient(135deg, var(--color-acento-vibrante), var(--color-acento-suave));
+  background: linear-gradient(135deg, #2C5F8D, #0D2847);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 142, 125, 0.4);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.6);
 }
 
 .action-btn.secondary {
-  background: var(--color-fondo-secundario);
-  color: var(--color-texto-oscuro);
-  border: 2px solid var(--color-acento-suave);
+  background: white;
+  color: #4A90E2;
+  border: 2px solid #4A90E2;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
 }
 
 .action-btn.secondary:hover {
-  background: var(--color-acento-suave);
-  border-color: var(--color-cta);
+  background: #4A90E2;
+  color: white;
+  border-color: #4A90E2;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
 .action-btn {
@@ -1778,7 +1781,7 @@ function formatearFechaCorta(fecha: string) {
   justify-content: space-between;
   align-items: center;
   padding: 24px 28px;
-  border-bottom: 2px solid var(--color-acento-suave);
+  border-bottom: 2px solid #E8F2FB;
   position: sticky;
   top: 0;
   background: white;
@@ -1811,7 +1814,7 @@ function formatearFechaCorta(fecha: string) {
 }
 
 .modal-close-btn:hover {
-  background: var(--color-fondo-secundario);
+  background: #E8F2FB;
   color: var(--color-texto-oscuro);
 }
 

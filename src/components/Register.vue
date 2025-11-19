@@ -1,5 +1,17 @@
 <template>
   <div class="register-container">
+    <ToastNotification
+      v-for="toast in toasts"
+      :key="toast.id"
+      :message="toast.message"
+      :title="toast.title"
+      :type="toast.type"
+      :duration="toast.duration"
+      :position="toast.position"
+      :show="toast.show"
+      @close="removeToast(toast.id)"
+    />
+    
     <div class="register-decoration"></div>
 
     <div class="register-card">
@@ -259,8 +271,11 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../lib/conectionWithSupabase";
+import ToastNotification from './ToastNotification.vue';
+import { useToast } from '../composables/useToast';
 
 const router = useRouter();
+const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
 // Datos del formulario
 const email = ref("");
@@ -408,7 +423,13 @@ const handleRegister = async () => {
 
     if (error) {
       console.error("Error en registro:", error);
-      alert(`Error al registrar: ${error.message}`);
+      showError(
+        error.message === 'User already registered' 
+          ? 'Este correo ya está registrado. Por favor, inicia sesión.' 
+          : `Error al registrar: ${error.message}`,
+        'Error de registro',
+        6000
+      );
       isLoading.value = false;
       return;
     }
@@ -416,15 +437,23 @@ const handleRegister = async () => {
     // Registro exitoso
     console.log("Registro exitoso:", data);
 
-    alert(
-      `¡Bienvenido ${firstName.value} ${lastName.value}!\n\nTu cuenta ha sido creada exitosamente.\n\nPor favor, revisa tu correo electrónico para confirmar tu cuenta.`
+    showSuccess(
+      `Tu cuenta ha sido creada exitosamente, ${firstName.value}. Por favor, revisa tu correo ${email.value} para confirmar tu cuenta.`,
+      '¡Registro exitoso!',
+      6000
     );
 
     // Redirigir al login
-    router.push("/login");
-  } catch (error: any) {
-    console.error("Error inesperado:", error);
-    alert("Ocurrió un error inesperado. Por favor, intenta de nuevo.");
+    setTimeout(() => {
+      router.push("/login");
+    }, 2000);
+  } catch (err: any) {
+    console.error("Error inesperado:", err);
+    showError(
+      "Ocurrió un error inesperado. Por favor, verifica tu conexión e intenta de nuevo.",
+      'Error inesperado',
+      5000
+    );
   } finally {
     isLoading.value = false;
   }
@@ -466,9 +495,9 @@ const handleRegister = async () => {
   justify-content: center;
   background: linear-gradient(
     135deg,
-    var(--color-fondo-principal) 0%,
-    var(--color-fondo-secundario) 50%,
-    var(--color-acento-suave) 100%
+    #FFFFFF 0%,
+    #F8FAFB 50%,
+    #E8F2FB 100%
   );
   padding: 30px 20px;
   position: relative;
@@ -483,7 +512,7 @@ const handleRegister = async () => {
   height: 600px;
   background: radial-gradient(
     circle,
-    rgba(239, 142, 125, 0.15) 0%,
+    rgba(74, 144, 226, 0.15) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -499,7 +528,7 @@ const handleRegister = async () => {
   height: 500px;
   background: radial-gradient(
     circle,
-    rgba(162, 211, 199, 0.2) 0%,
+    rgba(44, 95, 141, 0.2) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -523,8 +552,8 @@ const handleRegister = async () => {
 .register-header {
   background: linear-gradient(
     135deg,
-    var(--color-acento-vibrante),
-    var(--color-acento-suave)
+    #4A90E2,
+    #2C5F8D
   );
   padding: 20px 30px 16px;
   text-align: center;
@@ -624,8 +653,8 @@ const handleRegister = async () => {
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-acento-vibrante);
-  box-shadow: 0 0 0 4px rgba(239, 142, 125, 0.1);
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
 }
 
 .form-input::placeholder {
@@ -673,7 +702,7 @@ const handleRegister = async () => {
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--color-acento-suave);
+  color: #4A90E2;
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -683,7 +712,7 @@ const handleRegister = async () => {
 }
 
 .password-toggle:hover {
-  color: var(--color-acento-vibrante);
+  color: #2C5F8D;
 }
 
 .password-requirements {

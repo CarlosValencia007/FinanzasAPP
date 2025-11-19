@@ -1,5 +1,17 @@
 <template>
   <div class="login-container">
+    <ToastNotification
+      v-for="toast in toasts"
+      :key="toast.id"
+      :message="toast.message"
+      :title="toast.title"
+      :type="toast.type"
+      :duration="toast.duration"
+      :position="toast.position"
+      :show="toast.show"
+      @close="removeToast(toast.id)"
+    />
+    
     <div class="login-decoration"></div>
 
     <div class="login-card">
@@ -137,7 +149,10 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../lib/conectionWithSupabase";
+import ToastNotification from './ToastNotification.vue';
+import { useToast } from '../composables/useToast';
 const router = useRouter();
+const { toasts, removeToast, success: showSuccess } = useToast();
 
 const email = ref("");
 const password = ref("");
@@ -273,14 +288,18 @@ const handleLogin = async () => {
     isLoading.value = false;
 
     // Mostrar mensaje de éxito
-    alert(
+    showSuccess(
       `¡Bienvenido ${userEmail}! ${
-        rememberMe.value ? "(Sesión guardada)" : "(Sesión temporal)"
-      }`
+        rememberMe.value ? "Tu sesión se guardará para futuros inicios." : "Tu sesión es temporal."
+      }`,
+      'Inicio de sesión exitoso',
+      4000
     );
 
     // Redirigir a la página principal o dashboard
-    router.push("/");
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 1500);
   } catch (error: any) {
     console.error("Error inesperado:", error);
     isLoading.value = false;
@@ -324,9 +343,9 @@ const handleLogin = async () => {
   justify-content: center;
   background: linear-gradient(
     135deg,
-    var(--color-fondo-principal) 0%,
-    var(--color-fondo-secundario) 50%,
-    var(--color-acento-suave) 100%
+    #FFFFFF 0%,
+    #F8FAFB 50%,
+    #E8F2FB 100%
   );
   padding: 30px 20px;
   position: relative;
@@ -341,7 +360,7 @@ const handleLogin = async () => {
   height: 600px;
   background: radial-gradient(
     circle,
-    rgba(239, 142, 125, 0.15) 0%,
+    rgba(74, 144, 226, 0.15) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -357,7 +376,7 @@ const handleLogin = async () => {
   height: 500px;
   background: radial-gradient(
     circle,
-    rgba(162, 211, 199, 0.2) 0%,
+    rgba(44, 95, 141, 0.2) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -381,8 +400,8 @@ const handleLogin = async () => {
 .login-header {
   background: linear-gradient(
     135deg,
-    var(--color-acento-vibrante),
-    var(--color-acento-suave)
+    #4A90E2,
+    #2C5F8D
   );
   padding: 24px 30px 20px;
   text-align: center;
@@ -513,8 +532,8 @@ const handleLogin = async () => {
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-acento-vibrante);
-  box-shadow: 0 0 0 4px rgba(239, 142, 125, 0.1);
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
 }
 
 .form-input::placeholder {
@@ -532,7 +551,7 @@ const handleLogin = async () => {
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--color-acento-suave);
+  color: #4A90E2;
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -542,7 +561,7 @@ const handleLogin = async () => {
 }
 
 .password-toggle:hover {
-  color: var(--color-acento-vibrante);
+  color: #2C5F8D;
 }
 
 .form-options {
@@ -575,7 +594,7 @@ const handleLogin = async () => {
 }
 
 .forgot-password {
-  color: var(--color-acento-vibrante);
+  color: #4A90E2;
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 700;
@@ -583,13 +602,13 @@ const handleLogin = async () => {
 }
 
 .forgot-password:hover {
-  color: var(--color-acento-suave);
+  color: #2C5F8D;
   text-decoration: underline;
 }
 
 .login-button {
-  background: linear-gradient(135deg, var(--color-cta), #8bc9bd);
-  color: var(--color-texto-oscuro);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
+  color: white;
   border: none;
   padding: 12px 28px;
   border-radius: 10px;
@@ -597,14 +616,14 @@ const handleLogin = async () => {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(162, 211, 199, 0.3);
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
   margin-top: 4px;
 }
 
 .login-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(162, 211, 199, 0.4);
-  background: linear-gradient(135deg, #8bc9bd, var(--color-cta));
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+  background: linear-gradient(135deg, #2C5F8D, #0D2847);
 }
 
 .login-button:active:not(:disabled) {
@@ -710,14 +729,14 @@ const handleLogin = async () => {
 }
 
 .signup-link {
-  color: var(--color-acento-vibrante);
+  color: #4A90E2;
   text-decoration: none;
   font-weight: 700;
   transition: color 0.3s ease;
 }
 
 .signup-link:hover {
-  color: var(--color-acento-suave);
+  color: #2C5F8D;
   text-decoration: underline;
 }
 
