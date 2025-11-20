@@ -15,13 +15,18 @@
     "@iconify/vue": "^5.0.0",
     "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/vite": "^4.1.16",
+    "@tsparticles/slim": "^3.9.1",
+    "@tsparticles/vue3": "^3.0.1",
+    "aos": "^2.3.4",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
     "tailwindcss": "^4.1.16",
+    "tsparticles": "^3.9.1",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@types/aos": "^3.0.7",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^24.6.0",
     "@vitejs/plugin-vue": "^6.0.1",

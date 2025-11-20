@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-    --color-fondo-principal: #FEF7E1;    
-    --color-fondo-secundario: #EDD8BB;   
-    --color-acento-suave: #E2AA87;      
-    --color-acento-vibrante: #EF8E7D;    
-    --color-cta: #A2D3C7;                
-    --color-texto-oscuro: #35495e;    
-    --color-extra: #EF8E7D;
+    --color-fondo-principal: #FFFFFF;    /* Blanco */
+    --color-fondo-secundario: #F8FAFB;   /* Blanco grisáceo */
+    --color-acento-suave: #4A90E2;       /* Azul cobalto */
+    --color-acento-vibrante: #2C5F8D;    /* Azul marino */
+    --color-cta: #4A90E2;                /* Azul cobalto */
+    --color-texto-oscuro: #1A2B3C;       /* Azul oscuro para texto */
+    --color-extra: #0D2847;              /* Azul marino profundo */
 }

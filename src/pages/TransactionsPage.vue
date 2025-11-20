@@ -6,13 +6,13 @@
         <h1 class="page-title">Mis Transacciones</h1>
         <p class="page-subtitle">Administra tus ingresos y gastos</p>
       </div>
-      <button @click="mostrarFormulario = !mostrarFormulario" class="btn-add">
+      <button @click="mostrarFormulario = true" class="btn-add">
         <Icon 
-          :icon="mostrarFormulario ? 'material-symbols:close' : 'material-symbols:add'" 
+          icon="material-symbols:add" 
           width="24" 
           height="24" 
         />
-        {{ mostrarFormulario ? 'Cerrar' : 'Nueva Transacción' }}
+        Nueva Transacción
       </button>
     </div>
 
@@ -52,13 +52,26 @@
       </div>
     </div>
 
-    <!-- Formulario de agregar transacción -->
-    <transition name="slide-fade" mode="out-in">
-      <div v-if="mostrarFormulario" class="form-container" key="form">
-        <AddTransactionForm 
-          @submit="handleAgregarTransaccion"
-          @cancel="mostrarFormulario = false"
-        />
+    <!-- Modal de nueva transacción -->
+    <transition name="fade" mode="out-in">
+      <div v-if="mostrarFormulario" class="modal-overlay" @click.self="mostrarFormulario = false" key="modal">
+        <div class="modal-content-form" @click.stop>
+          <div class="modal-header-form">
+            <h3 class="modal-title-form">
+              <Icon icon="material-symbols:add-circle" width="24" height="24" />
+              Nueva Transacción
+            </h3>
+            <button @click="mostrarFormulario = false" class="modal-close-btn" aria-label="Cerrar">
+              <Icon icon="material-symbols:close" width="24" height="24" />
+            </button>
+          </div>
+          <div class="modal-body-form">
+            <AddTransactionForm 
+              @submit="handleAgregarTransaccion"
+              @cancel="mostrarFormulario = false"
+            />
+          </div>
+        </div>
       </div>
     </transition>
 
@@ -171,7 +184,7 @@
           class="transaction-card"
           :class="transaccion.tipo"
         >
-          <div class="transaction-icon" :style="{ background: transaccion.categoria?.color || '#A2D3C7' }">
+          <div class="transaction-icon" :style="{ background: transaccion.categoria?.color || '#4A90E2' }">
             <Icon 
               :icon="transaccion.categoria?.icono || 'material-symbols:category'" 
               width="24" 
@@ -273,6 +286,8 @@ import { useTransacciones } from '../composables/useTransacciones'
 import { useCategorias } from '../composables/useCategorias'
 import { supabase } from '../lib/conectionWithSupabase'
 import type { ITransaccionConCategoria, IFiltrosTransaccion } from '../interfaces'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
 
 const router = useRouter()
 const mostrarFormulario = ref(false)
@@ -314,6 +329,14 @@ const usuarioId = ref<string | null>(null)
 
 // Cargar datos iniciales
 onMounted(async () => {
+  // Inicializar AOS
+  AOS.init({
+    duration: 600,
+    once: true,
+    offset: 50,
+    easing: 'ease-out-cubic',
+  })
+
   // Verificar autenticación
   const { data: { user } } = await supabase.auth.getUser()
   
@@ -372,30 +395,19 @@ async function limpiarFiltros() {
 async function handleAgregarTransaccion(data: { 
   type: string; 
   amount: number; 
-  category: string; 
+  categoryId: string; 
   description?: string; 
   date: string 
 }) {
   if (!usuarioId.value) return
 
-  // Buscar la categoría por nombre o crear una nueva
-  let categoriaId = categorias.value.find(c => 
-    c.nombre.toLowerCase() === data.category.toLowerCase()
-  )?.id
-
   // Mapear tipo de español a los valores correctos de la base de datos
   const tipoTransaccion = data.type === 'ingreso' ? 'ingreso' : 'gasto' as 'ingreso' | 'gasto'
-
-  // Si no existe categoría, usar una por defecto o la primera disponible
-  if (!categoriaId && categorias.value.length > 0) {
-    const categoriasPorTipo = categorias.value.filter(c => c.tipo === tipoTransaccion)
-    categoriaId = categoriasPorTipo[0]?.id || categorias.value[0].id
-  }
 
   const nuevaTransaccion = {
     tipo: tipoTransaccion,
     monto: data.amount,
-    id_categoria: categoriaId || '',
+    id_categoria: data.categoryId,
     descripcion: data.description,
     fecha_transaccion: data.date
   }
@@ -499,7 +511,7 @@ function formatearFecha(fecha: string) {
 <style scoped>
 .transactions-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-fondo-principal) 0%, var(--color-fondo-secundario) 50%, var(--color-cta) 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFB 50%, #E8F2FB 100%);
   padding: 80px 20px 40px;
 }
 
@@ -531,8 +543,8 @@ function formatearFecha(fecha: string) {
 }
 
 .btn-add {
-  background: linear-gradient(135deg, var(--color-cta), #8BC9BD);
-  color: var(--color-texto-oscuro);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
+  color: white;
   border: none;
   padding: 14px 28px;
   border-radius: 12px;
@@ -543,14 +555,13 @@ function formatearFecha(fecha: string) {
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(162, 211, 199, 0.3);
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
 }
 
 .btn-add:hover {
-  background: linear-gradient(135deg, var(--color-acento-vibrante), var(--color-acento-suave));
-  color: white;
+  background: linear-gradient(135deg, #2C5F8D, #0D2847);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 142, 125, 0.4);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.6);
 }
 
 /* Tarjetas de resumen */
@@ -590,7 +601,7 @@ function formatearFecha(fecha: string) {
 }
 
 .income-card .card-icon {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
 }
 
 .expense-card .card-icon {
@@ -598,7 +609,7 @@ function formatearFecha(fecha: string) {
 }
 
 .balance-card .card-icon {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #4A90E2, #0D2847);
 }
 
 .balance-card.negative .card-icon {
@@ -628,10 +639,79 @@ function formatearFecha(fecha: string) {
   color: #999;
 }
 
-/* Formulario */
-.form-container {
-  max-width: 1200px;
-  margin: 0 auto 32px;
+/* Modal de formulario */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content-form {
+  background: white;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 2px solid #E8F2FB;
+  position: sticky;
+  top: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+
+.modal-title-form {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+  background: #E8F2FB;
+  color: var(--color-texto-oscuro);
+}
+
+.modal-body-form {
+  padding: 28px;
+  flex: 1;
 }
 
 /* Filtros */
@@ -669,7 +749,7 @@ function formatearFecha(fecha: string) {
 .filter-select,
 .filter-input {
   padding: 10px 14px;
-  border: 2px solid var(--color-acento-suave);
+  border: 2px solid #E8F2FB;
   border-radius: 10px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -679,14 +759,14 @@ function formatearFecha(fecha: string) {
 .filter-select:focus,
 .filter-input:focus {
   outline: none;
-  border-color: var(--color-cta);
-  box-shadow: 0 0 0 3px rgba(162, 211, 199, 0.1);
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
 .btn-clear-filters {
-  background: var(--color-fondo-secundario);
+  background: #F8FAFB;
   color: var(--color-texto-oscuro);
-  border: none;
+  border: 2px solid #E8F2FB;
   padding: 10px 20px;
   border-radius: 10px;
   font-weight: 600;
@@ -699,7 +779,9 @@ function formatearFecha(fecha: string) {
 }
 
 .btn-clear-filters:hover {
-  background: #d0d0d0;
+  background: #E8F2FB;
+  border-color: #4A90E2;
+  color: #4A90E2;
 }
 
 /* Lista de transacciones */
@@ -733,7 +815,7 @@ function formatearFecha(fecha: string) {
 
 .spinner {
   animation: spin 1s linear infinite;
-  color: var(--color-cta);
+  color: #4A90E2;
 }
 
 @keyframes spin {
@@ -742,8 +824,8 @@ function formatearFecha(fecha: string) {
 
 .btn-retry,
 .btn-add-first {
-  background: linear-gradient(135deg, var(--color-cta), #8BC9BD);
-  color: var(--color-texto-oscuro);
+  background: linear-gradient(135deg, #4A90E2, #2C5F8D);
+  color: white;
   border: none;
   padding: 12px 24px;
   border-radius: 10px;
@@ -758,8 +840,9 @@ function formatearFecha(fecha: string) {
 
 .btn-retry:hover,
 .btn-add-first:hover {
-  background: linear-gradient(135deg, #8BC9BD, var(--color-cta));
+  background: linear-gradient(135deg, #2C5F8D, #0D2847);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
 }
 
 .transactions-list {
@@ -781,7 +864,7 @@ function formatearFecha(fecha: string) {
 }
 
 .transaction-card.ingreso {
-  border-left-color: #27ae60;
+  border-left-color: #4A90E2;
 }
 
 .transaction-card.gasto {
@@ -831,7 +914,7 @@ function formatearFecha(fecha: string) {
 }
 
 .transaction-amount.ingreso {
-  color: #27ae60;
+  color: #4A90E2;
 }
 
 .transaction-amount.gasto {
@@ -880,8 +963,8 @@ function formatearFecha(fecha: string) {
 }
 
 .btn-edit:hover {
-  background: #e3f2fd;
-  color: #2196f3;
+  background: #E8F2FB;
+  color: #4A90E2;
 }
 
 .btn-delete:hover {
@@ -929,7 +1012,7 @@ function formatearFecha(fecha: string) {
 }
 
 .edit-icon {
-  color: var(--color-cta);
+  color: #4A90E2;
   margin-bottom: 12px;
 }
 
@@ -967,12 +1050,14 @@ function formatearFecha(fecha: string) {
 }
 
 .btn-cancel {
-  background: var(--color-fondo-secundario);
+  background: #F8FAFB;
   color: var(--color-texto-oscuro);
+  border: 2px solid #E8F2FB;
 }
 
 .btn-cancel:hover {
-  background: #d0d0d0;
+  background: #E8F2FB;
+  border-color: #4A90E2;
 }
 
 .btn-confirm-delete {
@@ -986,28 +1071,58 @@ function formatearFecha(fecha: string) {
 }
 
 /* Animaciones */
-.slide-fade-enter-active {
+.fade-enter-active {
   transition: all 0.3s ease-out;
 }
 
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+.fade-leave-active {
+  transition: all 0.3s ease-in;
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(-20px);
+.fade-enter-from {
   opacity: 0;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.fade-enter-to {
+  opacity: 1;
 }
 
-.fade-enter-from,
+.fade-leave-from {
+  opacity: 1;
+}
+
 .fade-leave-to {
   opacity: 0;
+}
+
+.fade-enter-active .modal-content-form {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.fade-leave-active .modal-content-form {
+  animation: modalSlideOut 0.3s ease-in;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
 }
 
 /* Responsive */
@@ -1049,6 +1164,46 @@ function formatearFecha(fecha: string) {
 
   .modal-content {
     padding: 24px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-content-form {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .modal-header-form {
+    padding: 20px;
+  }
+
+  .modal-title-form {
+    font-size: 1.3rem;
+  }
+
+  .modal-body-form {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-form {
+    border-radius: 12px;
+  }
+
+  .modal-header-form {
+    padding: 16px;
+  }
+
+  .modal-title-form {
+    font-size: 1.2rem;
+  }
+
+  .modal-body-form {
+    padding: 16px;
   }
 }
 </style>
