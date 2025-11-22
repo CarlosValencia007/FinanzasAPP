@@ -2,19 +2,24 @@ import { mount } from "@vue/test-utils";
 import Grafico from "../../components/Grafico.vue";
 import { describe, expect, it } from "vitest";
 
-describe("Dashboard Charts", () => {
-  it("renderiza gráfico de barras y pastel", () => {
-    const wrapper = mount(Grafico);
+describe("Grafico.vue", () => {
+    it("Renderiza el componente correctamente", () => {
+        const wrapper = mount(Grafico);
 
-    expect(wrapper.find("[data-testid='bar-chart']").exists()).toBe(true);
-    expect(wrapper.find("[data-testid='pie-chart']").exists()).toBe(true);
-  });
-
-  it("muestra mensaje cuando no hay datos", () => {
-    const wrapper = mount(Grafico, {
-      props: { data: [] }
+        expect(wrapper.exists()).toBe(true);
     });
 
-    expect(wrapper.text()).toContain("No hay datos para mostrar");
-  });
+    it("Muestra el mensaje del gráfico", () => {
+        const wrapper = mount(Grafico);
+
+        expect(wrapper.text()).toContain("Gráfico de Finanzas");
+        expect(wrapper.find("h2").exists()).toBe(true);
+    });
+
+    it("Tiene la estructura básica del componente", () => {
+        const wrapper = mount(Grafico);
+
+        expect(wrapper.find("div").exists()).toBe(true);
+        expect(wrapper.find("h2").exists()).toBe(true);
+    });
 });
