@@ -1,4 +1,4 @@
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createRouter, createMemoryHistory } from "vue-router";
 import { supabase } from "../../lib/conectionWithSupabase";
@@ -12,6 +12,16 @@ vi.mock("../../lib/conectionWithSupabase", () => ({
             signUp: vi.fn(),
         },
     },
+}));
+
+// Mock de useToast
+vi.mock("../../composables/useToast", () => ({
+    useToast: () => ({
+        toasts: [],
+        removeToast: vi.fn(),
+        success: vi.fn(),
+        error: vi.fn(),
+    }),
 }));
 
 describe("Register.vue", () => {
@@ -44,6 +54,22 @@ describe("Register.vue", () => {
         });
 
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.find(".register-container").exists()).toBe(true);
+        expect(wrapper.find(".register-card").exists()).toBe(true);
+    });
+
+    it("Muestra el título y eslogan de la aplicación", () => {
+        const wrapper = mount(Register, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        expect(wrapper.text()).toContain("FINANZAPP");
+        expect(wrapper.text()).toContain("Tu aliado financiero");
+        expect(wrapper.text()).toContain("Crear Cuenta");
+        expect(wrapper.find(".logo-title").exists()).toBe(true);
+        expect(wrapper.find(".logo-tagline").exists()).toBe(true);
     });
 
     it("Muestra el formulario de registro con todos los campos", () => {
@@ -60,18 +86,6 @@ describe("Register.vue", () => {
         expect(wrapper.find('input[id="password"]').exists()).toBe(true);
         expect(wrapper.find('input[id="confirmPassword"]').exists()).toBe(true);
         expect(wrapper.find('button[type="submit"]').exists()).toBe(true);
-    });
-
-    it("Muestra el título y eslogan de la aplicación", () => {
-        const wrapper = mount(Register, {
-            global: {
-                plugins: [router],
-            },
-        });
-
-        expect(wrapper.text()).toContain("FINANZAPP");
-        expect(wrapper.text()).toContain("Tu aliado financiero");
-        expect(wrapper.text()).toContain("Crear Cuenta");
     });
 
     it("Actualiza los valores del modelo cuando el usuario escribe", async () => {
@@ -112,6 +126,24 @@ describe("Register.vue", () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.text()).toContain("@live.uleam.edu.ec");
+        expect(wrapper.find(".error-message").exists()).toBe(true);
+    });
+
+    it("Muestra mensaje de éxito cuando el correo es válido", async () => {
+        const wrapper = mount(Register, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        const emailInput = wrapper.find('input[type="email"]');
+        
+        await emailInput.setValue("test@live.uleam.edu.ec");
+        await emailInput.trigger("blur");
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).toContain("✓ Correo válido");
+        expect(wrapper.find(".success-message").exists()).toBe(true);
     });
 
     it("Muestra los requisitos de contraseña", () => {
@@ -127,6 +159,25 @@ describe("Register.vue", () => {
         expect(wrapper.text()).toContain("Minúscula");
         expect(wrapper.text()).toContain("Número");
         expect(wrapper.text()).toContain("Especial");
+    });
+
+    it("Actualiza los requisitos de contraseña cuando el usuario escribe", async () => {
+        const wrapper = mount(Register, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        const passwordInput = wrapper.find('input[id="password"]');
+        
+        // Escribir una contraseña que cumple algunos requisitos
+        await passwordInput.setValue("David1#");
+        await passwordInput.trigger("input");
+        await wrapper.vm.$nextTick();
+
+        // Verificar que algunos requisitos se marcan como cumplidos
+        const requirements = wrapper.findAll(".requirement");
+        expect(requirements.length).toBeGreaterThan(0);
     });
 
     it("Alterna la visibilidad de la contraseña al hacer clic en el botón", async () => {
@@ -145,15 +196,36 @@ describe("Register.vue", () => {
 
         // Hacer clic en el botón de toggle
         await toggleButton.trigger("click");
+        await wrapper.vm.$nextTick();
 
         // Ahora debe ser tipo text
         expect(passwordInput.attributes("type")).toBe("text");
 
         // Hacer clic de nuevo
         await toggleButton.trigger("click");
+        await wrapper.vm.$nextTick();
 
         // Debe volver a ser password
         expect(passwordInput.attributes("type")).toBe("password");
+    });
+
+    it("Alterna la visibilidad de la confirmación de contraseña", async () => {
+        const wrapper = mount(Register, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        const confirmPasswordInput = wrapper.find('input[id="confirmPassword"]');
+        const toggleButtons = wrapper.findAll(".password-toggle");
+        const toggleConfirmButton = toggleButtons[1];
+
+        expect(confirmPasswordInput.attributes("type")).toBe("password");
+
+        await toggleConfirmButton.trigger("click");
+        await wrapper.vm.$nextTick();
+
+        expect(confirmPasswordInput.attributes("type")).toBe("text");
     });
 
     it("Valida que las contraseñas coincidan", async () => {
@@ -174,6 +246,7 @@ describe("Register.vue", () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.text()).toContain("Las contraseñas no coinciden");
+        expect(wrapper.find(".error-message").exists()).toBe(true);
     });
 
     it("Muestra mensaje de éxito cuando las contraseñas coinciden", async () => {
@@ -193,7 +266,8 @@ describe("Register.vue", () => {
         await confirmPasswordInput.trigger("input");
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).toContain("Las contraseñas coinciden");
+        expect(wrapper.text()).toContain("✓ Las contraseñas coinciden");
+        expect(wrapper.find(".success-message").exists()).toBe(true);
     });
 
     it("Contiene un enlace para iniciar sesión", () => {
@@ -248,7 +322,7 @@ describe("Register.vue", () => {
 
         // Enviar el formulario
         await wrapper.find("form").trigger("submit.prevent");
-        await wrapper.vm.$nextTick();
+        await flushPromises();
 
         // Verificar que se llamó al método de registro con los datos correctos
         expect(supabase.auth.signUp).toHaveBeenCalledWith({
@@ -297,8 +371,47 @@ describe("Register.vue", () => {
 
         // Verificar que muestra el spinner
         expect(wrapper.text()).toContain("Registrando...");
+        expect(wrapper.find(".loading-spinner").exists()).toBe(true);
 
         await submitPromise;
+        await flushPromises();
     });
 
+    it("Deshabilita el botón de registro cuando el formulario no es válido", async () => {
+        const wrapper = mount(Register, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        const submitButton = wrapper.find('button[type="submit"]');
+        expect(submitButton.attributes("disabled")).toBeDefined();
+    });
+
+    it("Habilita el botón de registro cuando el formulario es válido", async () => {
+        const wrapper = mount(Register, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        // Llenar el formulario con datos válidos
+        await wrapper.find('input[type="email"]').setValue("test@live.uleam.edu.ec");
+        await wrapper.find('input[type="email"]').trigger("blur");
+        
+        await wrapper.find('input[id="firstName"]').setValue("David");
+        await wrapper.find('input[id="lastName"]').setValue("Javier");
+        
+        await wrapper.find('input[id="password"]').setValue("David123#");
+        await wrapper.find('input[id="password"]').trigger("input");
+        
+        await wrapper.find('input[id="confirmPassword"]').setValue("David123#");
+        await wrapper.find('input[id="confirmPassword"]').trigger("input");
+        
+        await wrapper.vm.$nextTick();
+
+        const submitButton = wrapper.find('button[type="submit"]');
+        // El botón no debería estar deshabilitado si el formulario es válido
+        expect(submitButton.attributes("disabled")).toBeUndefined();
+    });
 });

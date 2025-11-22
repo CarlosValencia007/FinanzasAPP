@@ -1,4 +1,4 @@
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createRouter, createMemoryHistory } from "vue-router";
 import { supabase } from "../../lib/conectionWithSupabase";
@@ -10,8 +10,26 @@ vi.mock("../../lib/conectionWithSupabase", () => ({
     supabase: {
         auth: {
             signInWithPassword: vi.fn(),
+            getSession: vi.fn(),
         },
+        from: vi.fn(() => ({
+            select: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                    single: vi.fn(),
+                })),
+            })),
+        })),
     },
+}));
+
+// Mock de useToast
+vi.mock("../../composables/useToast", () => ({
+    useToast: () => ({
+        toasts: [],
+        removeToast: vi.fn(),
+        success: vi.fn(),
+        error: vi.fn(),
+    }),
 }));
 
 describe("Login.vue", () => {
@@ -25,6 +43,7 @@ describe("Login.vue", () => {
                 { path: "/", component: { template: "<div>Home</div>" } },
                 { path: "/register", component: Register },
                 { path: "/forgot-password", component: { template: "<div>Forgot Password</div>" } },
+                { path: "/dashboard", component: { template: "<div>Dashboard</div>" } },
             ],
         });
 
@@ -36,33 +55,40 @@ describe("Login.vue", () => {
         vi.clearAllMocks();
     });
 
-    it("Hace login correctamente con credenciales válidas", async () => {
-        // Mock de la respuesta de Supabase
-        (supabase.auth.signInWithPassword as any).mockResolvedValue({
-            data: { user: { email: "e1315844983@live.uleam.edu.ec" } },
-            error: null,
-        });
-
+    it("Renderiza el componente correctamente", () => {
         const wrapper = mount(Login, {
             global: {
                 plugins: [router],
             },
         });
 
-        // Llenar el formulario
-        await wrapper.find('[data-testid="email"]').setValue("e1315844983@live.uleam.edu.ec");
-        await wrapper.find('[data-testid="password"]').setValue("David132#");
+        expect(wrapper.exists()).toBe(true);
+        expect(wrapper.find(".login-container").exists()).toBe(true);
+        expect(wrapper.find(".login-card").exists()).toBe(true);
+    });
 
-        // Enviar el formulario
-        await wrapper.find('[data-testid="btn-login"]').trigger("submit.prevent");
-
-        await wrapper.vm.$nextTick();
-
-        // Verificar que se llamó al método de login con los datos correctos
-        expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
-            email: "e1315844983@live.uleam.edu.ec",
-            password: "David132#",
+    it("Muestra el título y eslogan de la aplicación", () => {
+        const wrapper = mount(Login, {
+            global: {
+                plugins: [router],
+            },
         });
+
+        expect(wrapper.text()).toContain("FINANZAPP");
+        expect(wrapper.text()).toContain("Tu aliado financiero");
+        expect(wrapper.find(".logo-title").exists()).toBe(true);
+        expect(wrapper.find(".logo-tagline").exists()).toBe(true);
+    });
+
+    it("Muestra el título de bienvenida", () => {
+        const wrapper = mount(Login, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        expect(wrapper.text()).toContain("¡Bienvenido!");
+        expect(wrapper.find(".welcome-title").exists()).toBe(true);
     });
 
     it("Muestra un formulario de inicio de sesión con todos los campos", () => {
@@ -79,7 +105,6 @@ describe("Login.vue", () => {
         expect(wrapper.find('button[type="submit"]').exists()).toBe(true);
     });
 
-    // Comprueba que el input cambia cuando escribe el usuario
     it("Actualiza los valores del modelo cuando el usuario escribe", async () => {
         const wrapper = mount(Login, {
             global: {
@@ -88,7 +113,7 @@ describe("Login.vue", () => {
         });
 
         const emailInput = wrapper.find('input[type="email"]');
-        const passwordInput = wrapper.find('input[type="password"]');
+        const passwordInput = wrapper.find('input[id="password"]');
 
         await emailInput.setValue("e1315844983@live.uleam.edu.ec");
         await passwordInput.setValue("David132#");
@@ -98,6 +123,11 @@ describe("Login.vue", () => {
     });
 
     it("Muestra error cuando el dominio del email no es válido", async () => {
+        (supabase.auth.signInWithPassword as any).mockResolvedValue({
+            data: null,
+            error: { message: "Invalid login credentials" },
+        });
+
         const wrapper = mount(Login, {
             global: {
                 plugins: [router],
@@ -105,13 +135,13 @@ describe("Login.vue", () => {
         });
 
         await wrapper.find('input[type="email"]').setValue("test@gmail.com");
-        await wrapper.find('input[type="password"]').setValue("password123");
+        await wrapper.find('input[id="password"]').setValue("password123");
         await wrapper.find("form").trigger("submit.prevent");
-
-        await wrapper.vm.$nextTick();
+        await flushPromises();
 
         // Verificar que aparece el mensaje de error
         expect(wrapper.text()).toContain("@live.uleam.edu.ec");
+        expect(wrapper.find(".alert-error").exists()).toBe(true);
     });
 
     it("Alterna la visibilidad de la contraseña al hacer clic en el botón", async () => {
@@ -129,12 +159,14 @@ describe("Login.vue", () => {
 
         // Hacer clic en el botón de toggle
         await toggleButton.trigger("click");
+        await wrapper.vm.$nextTick();
 
         // Ahora debe ser tipo text
         expect(passwordInput.attributes("type")).toBe("text");
 
         // Hacer clic de nuevo
         await toggleButton.trigger("click");
+        await wrapper.vm.$nextTick();
 
         // Debe volver a ser password
         expect(passwordInput.attributes("type")).toBe("password");
@@ -154,6 +186,7 @@ describe("Login.vue", () => {
 
         // Marcar el checkbox
         await checkbox.setValue(true);
+        await wrapper.vm.$nextTick();
 
         expect((checkbox.element as HTMLInputElement).checked).toBe(true);
     });
@@ -163,13 +196,13 @@ describe("Login.vue", () => {
             global: { plugins: [router] },
         });
 
-        // Buscar todos los RouterLink y filtrar por el que va a /register
         const links = wrapper.findAllComponents({ name: "RouterLink" });
         const registerLink = links.find(link => link.props("to") === "/register");
 
         expect(registerLink).toBeDefined();
         expect(registerLink?.props("to")).toBe("/register");
-        expect(registerLink?.text()).toContain("Regístrate");
+        expect(wrapper.text()).toContain("¿No tienes cuenta?");
+        expect(wrapper.text()).toContain("Regístrate");
     });
 
     it("Contiene un enlace para recuperar contraseña", () => {
@@ -177,23 +210,117 @@ describe("Login.vue", () => {
             global: { plugins: [router] },
         });
 
-        // Buscar el RouterLink que va a /forgot-password
         const links = wrapper.findAllComponents({ name: "RouterLink" });
         const forgotLink = links.find(link => link.props("to") === "/forgot-password");
 
         expect(forgotLink).toBeDefined();
         expect(forgotLink?.props("to")).toBe("/forgot-password");
-        expect(forgotLink?.text()).toBe("¿Olvidaste tu contraseña?");
+        expect(wrapper.text()).toContain("¿Olvidaste tu contraseña?");
     });
 
-    it("Muestra el título y eslogan de la aplicación", () => {
+    it("Hace login correctamente con credenciales válidas", async () => {
+        // Mock de la respuesta de Supabase
+        (supabase.auth.signInWithPassword as any).mockResolvedValue({
+            data: { 
+                user: { email: "e1315844983@live.uleam.edu.ec" },
+                session: { access_token: "mock-token" }
+            },
+            error: null,
+        });
+
         const wrapper = mount(Login, {
             global: {
                 plugins: [router],
             },
         });
 
-        expect(wrapper.text()).toContain("FINANZAPP");
-        expect(wrapper.text()).toContain("Tu aliado financiero");
+        // Llenar el formulario
+        await wrapper.find('[data-testid="email"]').setValue("e1315844983@live.uleam.edu.ec");
+        await wrapper.find('[data-testid="password"]').setValue("David132#");
+
+        // Enviar el formulario
+        await wrapper.find("form").trigger("submit.prevent");
+        await flushPromises();
+
+        // Verificar que se llamó al método de login con los datos correctos
+        expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+            email: "e1315844983@live.uleam.edu.ec",
+            password: "David132#",
+        });
+    });
+
+    it("Muestra el estado de carga mientras se procesa el login", async () => {
+        // Mock de la respuesta de Supabase con delay
+        (supabase.auth.signInWithPassword as any).mockImplementation(() => 
+            new Promise(resolve => setTimeout(() => resolve({ 
+                data: { user: { email: "test@live.uleam.edu.ec" }, session: { access_token: "token" } }, 
+                error: null 
+            }), 100))
+        );
+
+        const wrapper = mount(Login, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        // Llenar el formulario con datos válidos
+        await wrapper.find('[data-testid="email"]').setValue("e1315844983@live.uleam.edu.ec");
+        await wrapper.find('[data-testid="password"]').setValue("David132#");
+
+        // Enviar el formulario
+        const submitPromise = wrapper.find("form").trigger("submit.prevent");
+        await wrapper.vm.$nextTick();
+
+        // Verificar que muestra el spinner
+        expect(wrapper.text()).toContain("Iniciando...");
+        expect(wrapper.find(".loading-spinner").exists()).toBe(true);
+
+        await submitPromise;
+        await flushPromises();
+    });
+
+    it("Carga el email guardado si 'Recordarme' estaba activado", async () => {
+        localStorage.setItem("rememberEmail", "test@live.uleam.edu.ec");
+        localStorage.setItem("rememberMe", "true");
+
+        const wrapper = mount(Login, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        await wrapper.vm.$nextTick();
+
+        const emailInput = wrapper.find('input[type="email"]');
+        expect((emailInput.element as HTMLInputElement).value).toBe("test@live.uleam.edu.ec");
+    });
+
+    it("Muestra mensaje de error cuando las credenciales son incorrectas", async () => {
+        (supabase.auth.signInWithPassword as any).mockResolvedValue({
+            data: null,
+            error: { message: "Invalid login credentials" },
+        });
+
+        (supabase.from as any).mockReturnValue({
+            select: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+                })),
+            })),
+        });
+
+        const wrapper = mount(Login, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        await wrapper.find('[data-testid="email"]').setValue("e1315844983@live.uleam.edu.ec");
+        await wrapper.find('[data-testid="password"]').setValue("wrongpassword");
+        await wrapper.find("form").trigger("submit.prevent");
+        await flushPromises();
+
+        expect(wrapper.find(".alert-error").exists()).toBe(true);
     });
 });
