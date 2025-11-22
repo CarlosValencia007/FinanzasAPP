@@ -41,7 +41,7 @@ export function useTransacciones() {
       id_usuario: data.user_id,
       id_categoria: data.category_id,
       tipo: data.type,
-      monto: parseFloat(data.amount),
+      monto: Number(data.amount) || 0,
       descripcion: data.description,
       fecha_transaccion: data.transaction_date,
       creado_en: data.created_at,
