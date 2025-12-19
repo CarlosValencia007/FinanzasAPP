@@ -7,7 +7,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: us-central1 # Puedes cambiar la región si prefieres otra
+  REGION: us-west2 # Puedes cambiar la región si prefieres otra
   SERVICE_NAME: finanzas-app
   REPOSITORY: finanzas # Nombre que le diste al repositorio en Artifact Registry
 
