@@ -3,14 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "engines":{
-    "node":">=20.19.0"
+  "engines": {
+    "node": ">=20.19.0"
   },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },
@@ -33,6 +34,7 @@
     "@types/jsdom": "^27.0.0",
     "@types/node": "^24.6.0",
     "@vitejs/plugin-vue": "^6.0.1",
+    "@vitest/coverage-v8": "^4.0.17",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
     "cypress": "^15.5.0",
