@@ -64,6 +64,31 @@ export function useTransacciones() {
   }
 
   /**
+   * Aplicar filtros a la consulta de transacciones
+   */
+  function aplicarFiltros(query: any, filtros: IFiltrosTransaccion) {
+    if (filtros.tipo && filtros.tipo !== "todos") {
+      query = query.eq("type", filtros.tipo);
+    }
+    if (filtros.id_categoria) {
+      query = query.eq("category_id", filtros.id_categoria);
+    }
+    if (filtros.fecha_inicio) {
+      query = query.gte("transaction_date", filtros.fecha_inicio);
+    }
+    if (filtros.fecha_fin) {
+      query = query.lte("transaction_date", filtros.fecha_fin);
+    }
+    if (filtros.monto_minimo !== undefined) {
+      query = query.gte("amount", filtros.monto_minimo);
+    }
+    if (filtros.monto_maximo !== undefined) {
+      query = query.lte("amount", filtros.monto_maximo);
+    }
+    return query;
+  }
+
+  /**
    * Obtener todas las transacciones del usuario
    */
   async function obtenerTransacciones(
@@ -81,24 +106,7 @@ export function useTransacciones() {
 
       // Aplicar filtros
       if (filtros) {
-        if (filtros.tipo && filtros.tipo !== "todos") {
-          query = query.eq("type", filtros.tipo);
-        }
-        if (filtros.id_categoria) {
-          query = query.eq("category_id", filtros.id_categoria);
-        }
-        if (filtros.fecha_inicio) {
-          query = query.gte("transaction_date", filtros.fecha_inicio);
-        }
-        if (filtros.fecha_fin) {
-          query = query.lte("transaction_date", filtros.fecha_fin);
-        }
-        if (filtros.monto_minimo !== undefined) {
-          query = query.gte("amount", filtros.monto_minimo);
-        }
-        if (filtros.monto_maximo !== undefined) {
-          query = query.lte("amount", filtros.monto_maximo);
-        }
+        query = aplicarFiltros(query, filtros);
       }
 
       const { data, error: supabaseError } = await query.order(
